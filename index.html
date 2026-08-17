@@ -1838,61 +1838,71 @@
         }
 
         /* ===== СТИЛИ ДЛЯ КАПЧИ ===== */
-        .captcha-container {
-            margin: 15px 0 10px 0;
+        .captcha-wrapper {
             display: flex;
-            align-items: center;
-            gap: 12px;
             justify-content: center;
-            background: rgba(240, 237, 229, 0.9);
-            padding: 12px 20px;
-            border-radius: 12px;
-            border: 2px solid #c3a684;
+            margin-bottom: 12px;
+        }
+
+        .captcha-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(240, 237, 229, 0.5);
+            padding: 8px 16px;
+            border-radius: 10px;
             transition: all 0.3s ease;
+            backdrop-filter: blur(2px);
+            font-size: 14px;
         }
 
         .captcha-container:hover {
-            border-color: #585149;
-            background: rgba(232, 224, 208, 0.9);
+            background: rgba(240, 237, 229, 0.7);
         }
 
         .captcha-container input[type="checkbox"] {
-            width: 22px;
-            height: 22px;
+            width: 18px;
+            height: 18px;
             cursor: pointer;
             accent-color: #585149;
             flex-shrink: 0;
+            margin: 0;
         }
 
         .captcha-container label {
-            font-size: 16px;
             color: #585149;
             cursor: pointer;
             user-select: none;
-        }
-
-        .captcha-status {
             font-size: 14px;
-            color: #7a6e5f;
-            min-width: 30px;
-            text-align: center;
         }
 
-        .captcha-status.success {
+        .captcha-container .captcha-status {
+            font-size: 14px;
+            min-width: 24px;
+            text-align: center;
+            color: #7a6e5f;
+        }
+
+        .captcha-container .captcha-status.success {
             color: #27ae60;
         }
 
-        .captcha-status.error {
+        .captcha-container .captcha-status.error {
             color: #e74c3c;
         }
 
         @media (max-width: 600px) {
             .captcha-container {
-                flex-wrap: wrap;
-                padding: 12px 15px;
+                padding: 6px 12px;
+                gap: 8px;
+                font-size: 13px;
             }
             .captcha-container label {
-                font-size: 14px;
+                font-size: 13px;
+            }
+            .captcha-container input[type="checkbox"] {
+                width: 16px;
+                height: 16px;
             }
         }
     </style>
@@ -1927,11 +1937,13 @@
     <div id="searchTab" class="search-section active-tab">
         <h1>Введите код для получения параметров</h1>
         
-        <!-- КАПЧА ПЕРЕД ПОЛЕМ ПОИСКА -->
-        <div class="captcha-container">
-            <input type="checkbox" id="searchCaptchaCheckbox">
-            <label for="searchCaptchaCheckbox">Я не робот</label>
-            <span class="captcha-status" id="searchCaptchaStatus"></span>
+        <!-- КАПЧА -->
+        <div class="captcha-wrapper">
+            <div class="captcha-container">
+                <input type="checkbox" id="searchCaptchaCheckbox">
+                <label for="searchCaptchaCheckbox">Я не робот</label>
+                <span class="captcha-status" id="searchCaptchaStatus"></span>
+            </div>
         </div>
         
         <div class="search-box">
@@ -2344,11 +2356,11 @@
         const checkbox = document.getElementById('searchCaptchaCheckbox');
         const status = document.getElementById('searchCaptchaStatus');
         if (!checkbox.checked) {
-            status.textContent = '❌';
+            status.textContent = '✗';
             status.className = 'captcha-status error';
             return false;
         }
-        status.textContent = '✅';
+        status.textContent = '✓';
         status.className = 'captcha-status success';
         return true;
     }
