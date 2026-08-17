@@ -1836,6 +1836,65 @@
                 height: 50px;
             }
         }
+
+        /* ===== СТИЛИ ДЛЯ КАПЧИ ===== */
+        .captcha-container {
+            margin: 15px 0 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: center;
+            background: rgba(240, 237, 229, 0.9);
+            padding: 12px 20px;
+            border-radius: 12px;
+            border: 2px solid #c3a684;
+            transition: all 0.3s ease;
+        }
+
+        .captcha-container:hover {
+            border-color: #585149;
+            background: rgba(232, 224, 208, 0.9);
+        }
+
+        .captcha-container input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: #585149;
+            flex-shrink: 0;
+        }
+
+        .captcha-container label {
+            font-size: 16px;
+            color: #585149;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .captcha-status {
+            font-size: 14px;
+            color: #7a6e5f;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .captcha-status.success {
+            color: #27ae60;
+        }
+
+        .captcha-status.error {
+            color: #e74c3c;
+        }
+
+        @media (max-width: 600px) {
+            .captcha-container {
+                flex-wrap: wrap;
+                padding: 12px 15px;
+            }
+            .captcha-container label {
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1867,6 +1926,14 @@
     
     <div id="searchTab" class="search-section active-tab">
         <h1>Введите код для получения параметров</h1>
+        
+        <!-- КАПЧА ПЕРЕД ПОЛЕМ ПОИСКА -->
+        <div class="captcha-container">
+            <input type="checkbox" id="searchCaptchaCheckbox">
+            <label for="searchCaptchaCheckbox">Я не робот</label>
+            <span class="captcha-status" id="searchCaptchaStatus"></span>
+        </div>
+        
         <div class="search-box">
             <input type="text" id="codeInput" placeholder="например: 8" onkeypress="if(event.key==='Enter') searchCode()">
             <button onclick="searchCode()">Получить параметры</button>
@@ -2096,7 +2163,6 @@
         const starSymbols = ['✦', '✧', '⋆', '✦', '✧'];
         
         function createBurst(x, y) {
-            // Проверяем, что клик не на интерактивных элементах панелей
             const target = document.elementFromPoint(x, y);
             if (target && (target.closest('.admin-panel') || target.closest('.worker-panel') || 
                 target.closest('.assistant-panel') || target.closest('.modal') ||
@@ -2146,16 +2212,13 @@
             }, 1200);
         }
         
-        // Для ПК — клик мышью
         document.addEventListener('click', function(e) {
             createBurst(e.clientX, e.clientY);
         });
         
-        // Для телефона — касание
         document.addEventListener('touchstart', function(e) {
             const touch = e.touches[0];
             if (touch) {
-                // Небольшая задержка, чтобы не мешать другим элементам
                 setTimeout(() => {
                     createBurst(touch.clientX, touch.clientY);
                 }, 50);
@@ -2172,12 +2235,10 @@
         let lastStarTime = 0;
         let isMobile = false;
         
-        // Проверяем, мобильное ли устройство
         if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
             isMobile = true;
         }
         
-        // След работает только на ПК (не на телефонах)
         if (isMobile) {
             starTrailContainer.style.display = 'none';
             return;
@@ -2277,6 +2338,28 @@
     let isAdminUser = false;
     let isWorkerUser = false;
     let isAssistantUser = false;
+    
+    // ===== ФУНКЦИИ ДЛЯ КАПЧИ =====
+    function checkSearchCaptcha() {
+        const checkbox = document.getElementById('searchCaptchaCheckbox');
+        const status = document.getElementById('searchCaptchaStatus');
+        if (!checkbox.checked) {
+            status.textContent = '❌';
+            status.className = 'captcha-status error';
+            return false;
+        }
+        status.textContent = '✅';
+        status.className = 'captcha-status success';
+        return true;
+    }
+
+    function resetSearchCaptcha() {
+        const checkbox = document.getElementById('searchCaptchaCheckbox');
+        const status = document.getElementById('searchCaptchaStatus');
+        checkbox.checked = false;
+        status.textContent = '';
+        status.className = 'captcha-status';
+    }
     
     function isVideo(url) {
         if (!url) return false;
@@ -2441,15 +2524,12 @@
             tabs[0].classList.add('active');
             tabs[1].classList.remove('active');
             
-            // Очищаем галерею результатов поиска
             document.getElementById('gallery').innerHTML = '';
             
-            // Очищаем витрину
             if (showcaseGrid) {
                 showcaseGrid.innerHTML = '';
             }
             
-            // Удаляем динамически добавленный заголовок
             const title = document.querySelector('.showcase-title');
             if (title) {
                 title.remove();
@@ -2460,7 +2540,6 @@
             tabs[0].classList.remove('active');
             tabs[1].classList.add('active');
             
-            // Добавляем заголовок, если его нет
             if (showcaseGrid && !document.querySelector('.showcase-title')) {
                 const title = document.createElement('h1');
                 title.className = 'showcase-title';
@@ -2469,7 +2548,6 @@
                 showcaseGrid.parentNode.insertBefore(title, showcaseGrid);
             }
             
-            // Загружаем витрину
             loadShowcase();
         }
     }
@@ -4269,6 +4347,11 @@
     }
     
     async function searchCode() {
+        // ПРОВЕРКА КАПЧИ ПЕРЕД ПОИСКОМ
+        if (!checkSearchCaptcha()) {
+            return;
+        }
+        
         const code = document.getElementById('codeInput').value.trim();
         const gallery = document.getElementById('gallery');
         const adminNotification = document.getElementById('adminNotification');
@@ -4278,6 +4361,7 @@
             adminNotification.innerHTML = '';
             gallery.innerHTML = '';
             document.getElementById('codeInput').value = '';
+            resetSearchCaptcha();
             return;
         }
         
@@ -4311,13 +4395,16 @@
                     }
                 }
                 gallery.innerHTML = html;
+                resetSearchCaptcha(); // сбрасываем капчу после успешного поиска
             } else {
                 currentPhotosList = [];
                 gallery.innerHTML = `<div class="error-message">Код "${code}" не найден</div>`;
+                resetSearchCaptcha();
             }
         } catch (error) {
             console.error('Ошибка поиска:', error);
             gallery.innerHTML = `<div class="error-message">Ошибка подключения к базе данных</div>`;
+            resetSearchCaptcha();
         }
     }
     
