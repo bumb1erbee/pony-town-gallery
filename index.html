@@ -134,17 +134,96 @@
             z-index: 1;
         }
         
+        /* ===== КНОПКА СЛЕВА (вне контейнера) ===== */
+        .team-btn-wrapper {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+        }
+        
+        .team-btn {
+            background: #585149;
+            color: #f0ede5;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-decoration: none;
+            display: inline-block;
+            white-space: nowrap;
+            position: relative;
+            overflow: hidden;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .team-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.15);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+        
+        .team-btn:hover::after {
+            transform: scaleX(1);
+        }
+        
+        .team-btn:hover {
+            background: #6b6258;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 4px 15px rgba(88, 81, 73, 0.3);
+        }
+        
+        .team-btn:active {
+            transform: scale(0.95);
+        }
+        
+        @media (max-width: 600px) {
+            .team-btn-wrapper {
+                position: static;
+                text-align: center;
+                margin-bottom: 10px;
+            }
+            .team-btn {
+                padding: 8px 16px;
+                font-size: 14px;
+                width: auto;
+            }
+        }
+        
+        /* ===== ЗАГОЛОВОК ===== */
+        .header-center {
+            text-align: center;
+            margin-bottom: 10px;
+            padding-top: 10px;
+        }
+        
         .gallery-title {
             color: #585149;
             font-weight: bold;
             font-size: 28px;
-            text-align: center;
-            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 600px) {
+            .header-center {
+                padding-top: 0;
+            }
+            .gallery-title {
+                font-size: 22px;
+            }
         }
         
         .telegram-link {
             text-align: center;
-            margin-top: 10px;
+            margin-top: 0;
             margin-bottom: 20px;
             font-size: 16px;
             color: #585149;
@@ -1077,6 +1156,8 @@
         .sort-buttons {
             display: flex;
             gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
         }
         
         .sort-btn {
@@ -1104,6 +1185,30 @@
             background: #585149;
             color: #f0ede5;
             box-shadow: 0 2px 10px rgba(88, 81, 73, 0.3);
+        }
+        
+        /* Кнопки направления сортировки */
+        .sort-direction-btn {
+            background: #c3a684;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #585149;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            touch-action: manipulation;
+            min-width: 42px;
+            text-align: center;
+        }
+        
+        .sort-direction-btn:hover {
+            background: #b3926e;
+            transform: translateY(-1px) scale(1.05);
+        }
+        
+        .sort-direction-btn:active {
+            transform: scale(0.95);
         }
         
         .codes-container {
@@ -1916,6 +2021,11 @@
 </head>
 <body>
 
+<!-- ===== КНОПКА СЛЕВА (вне контейнера, фиксированная) ===== -->
+<div class="team-btn-wrapper">
+    <a href="https://telegra.ph/Nabor-personala-v-Pony-Town-Gallery-05-16" target="_blank" class="team-btn">Стать частью нашей команды</a>
+</div>
+
 <!-- ===== ПАДАЮЩИЕ ЗВЁЗДОЧКИ ===== -->
 <div class="falling-stars-container" id="fallingStarsContainer"></div>
 
@@ -1923,7 +2033,11 @@
 <div id="starTrailContainer"></div>
 
 <div class="container">
-    <div class="gallery-title">Pony Town Gallery</div>
+    <!-- ===== ЗАГОЛОВОК ПО ЦЕНТРУ ===== -->
+    <div class="header-center">
+        <div class="gallery-title">Pony Town Gallery</div>
+    </div>
+    
     <div class="telegram-link">
         <a href="https://t.me/pony_town_gallery" target="_blank">
             <img src="https://i.postimg.cc/HL6nMMQn/icons8-telegram-50.png" alt="Telegram" style="width:28px; height:28px; vertical-align:middle; margin-right:8px;">
@@ -2026,6 +2140,7 @@
                     <button class="sort-btn" id="sortByDateBtn" onclick="setCodesSort('date')">По дате</button>
                     <button class="sort-btn" id="sortByAlphaBtn" onclick="setCodesSort('alpha')">По алфавиту</button>
                     <button class="sort-btn" id="sortByNumericBtn" onclick="setCodesSort('numeric')">По номеру</button>
+                    <button class="sort-direction-btn" id="sortDirectionBtn" onclick="toggleSortDirection()" title="Поменять направление сортировки">↑</button>
                 </div>
             </div>
             <div id="codesContainer" class="codes-container"></div>
@@ -2324,6 +2439,7 @@
     
     let allCodesData = [];
     let codesSortType = 'date';
+    let sortAscending = true;
     
     let allShowcaseCodes = [];
     
@@ -2378,6 +2494,14 @@
         checkbox.checked = false;
         status.textContent = '';
         status.className = 'captcha-status';
+    }
+    
+    // ===== ФУНКЦИИ СОРТИРОВКИ =====
+    function toggleSortDirection() {
+        sortAscending = !sortAscending;
+        const btn = document.getElementById('sortDirectionBtn');
+        btn.textContent = sortAscending ? '↑' : '↓';
+        renderCodesList();
     }
     
     function isVideo(url) {
@@ -2609,6 +2733,10 @@
             sortedCodes.sort(naturalSort);
         } else {
             sortedCodes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        }
+        
+        if (!sortAscending) {
+            sortedCodes.reverse();
         }
         
         let html = '';
@@ -4366,7 +4494,6 @@
     }
     
     async function searchCode() {
-        // ПРОВЕРКА КАПЧИ ПЕРЕД ПОИСКОМ
         if (!checkSearchCaptcha()) {
             return;
         }
@@ -4414,7 +4541,7 @@
                     }
                 }
                 gallery.innerHTML = html;
-                resetSearchCaptcha(); // сбрасываем капчу после успешного поиска
+                resetSearchCaptcha();
             } else {
                 currentPhotosList = [];
                 gallery.innerHTML = `<div class="error-message">Код "${code}" не найден</div>`;
