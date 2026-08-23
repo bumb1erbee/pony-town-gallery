@@ -42,17 +42,18 @@
         
         .falling-star {
             position: absolute;
-            top: -20px;
+            top: -50px;
             font-size: 14px;
             animation: fall linear infinite;
             pointer-events: none;
-            will-change: transform, opacity;
+            will-change: transform;
             backface-visibility: hidden;
+            transform: translateY(-20px);
         }
         
         @keyframes fall {
             0% {
-                transform: translateY(0) rotate(0deg) scale(0.8);
+                transform: translateY(-20px) rotate(0deg) scale(0.8);
                 opacity: 0;
             }
             5% {
@@ -2029,7 +2030,7 @@
 <!-- ===== ПАДАЮЩИЕ ЗВЁЗДОЧКИ ===== -->
 <div class="falling-stars-container" id="fallingStarsContainer"></div>
 
-<!-- ===== ЗВЁЗДНЫЙ СЛЕД ЗА МЫШКОЙ ===== -->
+<!-- ===== ЗВЁЗДНЫЙ СЛЕД ЗА МЫШКОЙ (контейнер) ===== -->
 <div id="starTrailContainer"></div>
 
 <div class="container">
@@ -2272,19 +2273,24 @@
         
         const starSymbols = ['✦', '✧', '⋆', '✦', '✧'];
         const starColor = '#c1a27f';
-        const starCount = 40;
+        const isMobile = window.innerWidth <= 600;
+        // На телефоне меньше звёзд, чтобы не лагать
+        const starCount = isMobile ? 20 : 40;
         
         for (let i = 0; i < starCount; i++) {
             const star = document.createElement('div');
             star.className = 'falling-star';
             star.textContent = starSymbols[Math.floor(Math.random() * starSymbols.length)];
             
-            const size = 10 + Math.random() * 18;
+            const size = isMobile ? 10 + Math.random() * 14 : 10 + Math.random() * 18;
             star.style.fontSize = size + 'px';
             star.style.color = starColor;
             star.style.left = Math.random() * 100 + '%';
-            star.style.animationDuration = (8 + Math.random() * 14) + 's';
-            star.style.animationDelay = (Math.random() * 20) + 's';
+            // Увеличенная задержка, чтобы звёзды не "застревали" вверху
+            const delay = isMobile ? Math.random() * 15 : Math.random() * 20;
+            star.style.animationDelay = delay + 's';
+            const duration = isMobile ? 8 + Math.random() * 12 : 10 + Math.random() * 16;
+            star.style.animationDuration = duration + 's';
             star.style.opacity = 0.15 + Math.random() * 0.25;
             
             container.appendChild(star);
@@ -2316,7 +2322,8 @@
             burstContainer.style.left = x + 'px';
             burstContainer.style.top = y + 'px';
             
-            const starCount = 14 + Math.floor(Math.random() * 12);
+            const isMobile = window.innerWidth <= 600;
+            const starCount = isMobile ? 8 + Math.floor(Math.random() * 6) : 14 + Math.floor(Math.random() * 12);
             
             for (let i = 0; i < starCount; i++) {
                 const star = document.createElement('div');
@@ -2324,14 +2331,14 @@
                 star.textContent = starSymbols[Math.floor(Math.random() * starSymbols.length)];
                 
                 const angle = Math.random() * 2 * Math.PI;
-                const distance = 70 + Math.random() * 140;
+                const distance = isMobile ? 50 + Math.random() * 80 : 70 + Math.random() * 140;
                 const tx = Math.cos(angle) * distance;
                 const ty = Math.sin(angle) * distance;
                 
                 star.style.setProperty('--tx', tx + 'px');
                 star.style.setProperty('--ty', ty + 'px');
                 star.style.color = burstColors[Math.floor(Math.random() * burstColors.length)];
-                star.style.fontSize = (16 + Math.random() * 20) + 'px';
+                star.style.fontSize = (isMobile ? 14 : 16 + Math.random() * 20) + 'px';
                 star.style.animationDuration = (0.6 + Math.random() * 0.6) + 's';
                 
                 burstContainer.appendChild(star);
@@ -2403,7 +2410,7 @@
         });
     })();
     
-    // ===== ОСНОВНОЙ КОД САЙТА =====
+    // ===== ОСТАЛЬНОЙ КОД =====
     
     const firebaseConfig = {
         apiKey: "AIzaSyDxe2Drt0F3A2-XB7W48dAlB7GO5pX5eTQ",
