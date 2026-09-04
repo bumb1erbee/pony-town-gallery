@@ -703,6 +703,25 @@
             background: #b3926e;
         }
         
+        /* Кнопка направления сортировки */
+        .sort-direction-btn {
+            background: #c3a684;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #585149;
+            transition: 0.2s;
+            min-width: 42px;
+            text-align: center;
+        }
+        
+        .sort-direction-btn:hover {
+            background: #b3926e;
+            transform: scale(1.02);
+        }
+        
         /* Увеличенная ширина ползунка скролла */
         .codes-container {
             max-height: 320px;
@@ -1374,6 +1393,7 @@
                     <button class="sort-btn" id="sortByDateBtn" onclick="setCodesSort('date')">По дате</button>
                     <button class="sort-btn" id="sortByAlphaBtn" onclick="setCodesSort('alpha')">По алфавиту</button>
                     <button class="sort-btn" id="sortByNumericBtn" onclick="setCodesSort('numeric')">По номеру</button>
+                    <button class="sort-direction-btn" id="sortDirectionBtn" onclick="toggleSortDirection()" title="Поменять направление сортировки">↑</button>
                 </div>
             </div>
             <div id="codesContainer" class="codes-container"></div>
@@ -1425,6 +1445,12 @@
         </div>
         
         <h4>Скины в витрине</h4>
+        <div class="codes-list-header">
+            <h3 style="flex:1; margin:0;">Список скинов</h3>
+            <div class="sort-buttons">
+                <button class="sort-direction-btn" id="showcaseSortDirectionBtn" onclick="toggleShowcaseSortDirection()" title="Поменять направление сортировки">↑</button>
+            </div>
+        </div>
         <div id="showcaseListContainer" class="codes-container"></div>
     </div>
     
@@ -1532,8 +1558,10 @@
     
     let allCodesData = [];
     let codesSortType = 'date';
+    let sortAscending = true; // для кодов
     
     let allShowcaseCodes = [];
+    let showcaseSortAscending = true; // для витрины
     
     let editingRequestId = null;
     let editingOldCode = null;
@@ -1568,16 +1596,11 @@
     
     // Функция для натуральной сортировки по номеру
     function naturalSort(a, b) {
-        // Извлекаем числовую часть из кода
         const numA = parseInt(a.code);
         const numB = parseInt(b.code);
-        
-        // Если оба кода — числа, сортируем по числовому значению
         if (!isNaN(numA) && !isNaN(numB)) {
             return numA - numB;
         }
-        
-        // Если один из кодов не число, используем обычное сравнение строк
         return a.code.localeCompare(b.code);
     }
     
@@ -1717,6 +1740,7 @@
         }
     }
     
+    // === Сортировка кодов ===
     function setCodesSort(type) {
         codesSortType = type;
         const dateBtn = document.getElementById('sortByDateBtn');
@@ -1735,6 +1759,13 @@
             numericBtn.classList.add('active');
         }
         
+        renderCodesList();
+    }
+    
+    function toggleSortDirection() {
+        sortAscending = !sortAscending;
+        const btn = document.getElementById('sortDirectionBtn');
+        btn.textContent = sortAscending ? '↑' : '↓';
         renderCodesList();
     }
     
@@ -1757,6 +1788,10 @@
             sortedCodes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         }
         
+        if (!sortAscending) {
+            sortedCodes.reverse();
+        }
+        
         let html = '';
         sortedCodes.forEach(item => {
             const code = item.code;
@@ -1772,6 +1807,14 @@
             `;
         });
         container.innerHTML = html;
+    }
+    
+    // === Сортировка витрины ===
+    function toggleShowcaseSortDirection() {
+        showcaseSortAscending = !showcaseSortAscending;
+        const btn = document.getElementById('showcaseSortDirectionBtn');
+        btn.textContent = showcaseSortAscending ? '↑' : '↓';
+        loadShowcaseList();
     }
     
     async function loadShowcase() {
@@ -1852,7 +1895,6 @@
                 codesArray.push({ code, photosCount: photos.length, isInShowcase });
             });
             
-            // Сортируем по номеру (натуральная сортировка)
             codesArray.sort((a, b) => {
                 const numA = parseInt(a.code);
                 const numB = parseInt(b.code);
@@ -2003,23 +2045,33 @@
         
         try {
             const snapshot = await db.collection('showcase').orderBy('order', 'asc').get();
+            let items = [];
+            snapshot.forEach(doc => {
+                items.push({ id: doc.id, ...doc.data() });
+            });
             
-            if (snapshot.empty) {
+            // Сортируем по полю order с учётом направления
+            if (showcaseSortAscending) {
+                items.sort((a, b) => a.order - b.order);
+            } else {
+                items.sort((a, b) => b.order - a.order);
+            }
+            
+            if (items.length === 0) {
                 container.innerHTML = '<div style="text-align:center; padding:15px;">Нет скинов в витрине</div>';
                 return;
             }
             
             let html = '';
             let orderNumber = 1;
-            snapshot.forEach(doc => {
-                const item = doc.data();
-                const showcaseId = doc.id;
+            items.forEach(item => {
+                const showcaseId = item.id;
                 html += `
                     <div class="showcase-item">
                         <img src="${item.imageUrl}" onerror="this.style.opacity='0.5'" loading="lazy">
                         <div class="showcase-item-info">
                             <div class="showcase-item-code">Код: ${escapeHtml(item.code)}</div>
-                            <div style="font-size: 11px; color: #7a6e5f;">Порядок: ${orderNumber}</div>
+                            <div style="font-size: 11px; color: #7a6e5f;">Порядок: ${item.order}</div>
                         </div>
                         <div class="showcase-item-actions">
                             <button onclick="moveShowcaseItem('${showcaseId}', 'up')">↑</button>
@@ -2657,7 +2709,6 @@
             tabs[0].style.background = '#585149';
             tabs[0].style.color = '#f0ede5';
             loadAllCodes();
-            // Устанавливаем активную кнопку сортировки при загрузке
             setTimeout(() => {
                 const dateBtn = document.getElementById('sortByDateBtn');
                 const alphaBtn = document.getElementById('sortByAlphaBtn');
