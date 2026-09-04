@@ -2403,6 +2403,39 @@
                 height: 16px;
             }
         }
+
+        /* ===== КНОПКА СОРТИРОВКИ ПО НОМЕРУ ===== */
+        .sort-number-btn {
+            background: #585149;
+            color: #f0ede5;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            touch-action: manipulation;
+        }
+        .sort-number-btn:hover {
+            background: #6b6258;
+            transform: translateY(-1px) scale(1.05);
+        }
+        .sort-number-btn:active {
+            transform: scale(0.95);
+        }
+        @media (max-width: 600px) {
+            .sort-number-btn {
+                padding: 6px 12px;
+                font-size: 11px;
+                transition: background 0.3s ease;
+            }
+            .sort-number-btn:hover {
+                transform: none;
+            }
+            .sort-number-btn:active {
+                transform: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -2513,6 +2546,10 @@
         
         <div id="adminPhotoList" class="photos-list"></div>
         
+        <div style="display: flex; gap: 8px; margin: 10px 0; flex-wrap: wrap; align-items: center;">
+            <button class="sort-number-btn" onclick="sortAdminPhotosByNumber()">Сортировать по номеру</button>
+        </div>
+        
         <h3>2. Введите код для этих параметров</h3>
         <input type="text" id="adminCodeName" class="code-input" placeholder="например: 8">
         <button class="save-btn" onclick="saveCodeAdmin()">Сохранить код и параметры</button>
@@ -2563,7 +2600,10 @@
         
         <div class="add-showcase-area">
             <h4>Добавить скин в витрину</h4>
-            <select id="showcaseCodeSelect" class="code-input"></select>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
+                <select id="showcaseCodeSelect" class="code-input" style="flex:1; min-width:150px;"></select>
+                <button class="sort-direction-btn" id="showcaseSortDirectionBtn" onclick="toggleShowcaseSortDirection()" title="Поменять направление сортировки">↑</button>
+            </div>
             <div id="showcaseUploadArea" class="upload-area">
                 Перетащите картинку или нажмите для выбора
             </div>
@@ -2610,6 +2650,10 @@
     
     <div id="workerPhotoList" class="photos-list"></div>
     
+    <div style="display: flex; gap: 8px; margin: 10px 0; flex-wrap: wrap; align-items: center;">
+        <button class="sort-number-btn" onclick="sortWorkerPhotosByNumber()">Сортировать по номеру</button>
+    </div>
+    
     <h3>2. Введите код для этих параметров</h3>
     <input type="text" id="workerCodeName" class="code-input" placeholder="например: 8">
     <button class="save-btn" onclick="sendRequest('worker')">Отправить заявку на модерацию</button>
@@ -2630,6 +2674,10 @@
     <input type="file" id="assistantFileInput" multiple accept="image/*,video/*" style="display:none">
     
     <div id="assistantPhotoList" class="photos-list"></div>
+    
+    <div style="display: flex; gap: 8px; margin: 10px 0; flex-wrap: wrap; align-items: center;">
+        <button class="sort-number-btn" onclick="sortAssistantPhotosByNumber()">Сортировать по номеру</button>
+    </div>
     
     <h3>2. Введите код для этих параметров</h3>
     <input type="text" id="assistantCodeName" class="code-input" placeholder="например: 8">
@@ -2659,7 +2707,6 @@
         const starSymbols = ['✦', '✧', '⋆', '✦', '✧'];
         const starColor = '#c1a27f';
         const isMobile = window.innerWidth <= 600;
-        // На телефоне 20 звёзд, на ПК — 40
         const starCount = isMobile ? 20 : 40;
         
         for (let i = 0; i < starCount; i++) {
@@ -2833,6 +2880,7 @@
     let sortAscending = true;
     
     let allShowcaseCodes = [];
+    let showcaseSortAscending = true;
     
     let editingRequestId = null;
     let editingOldCode = null;
@@ -2893,6 +2941,39 @@
         const btn = document.getElementById('sortDirectionBtn');
         btn.textContent = sortAscending ? '↑' : '↓';
         renderCodesList();
+    }
+    
+    function toggleShowcaseSortDirection() {
+        showcaseSortAscending = !showcaseSortAscending;
+        const btn = document.getElementById('showcaseSortDirectionBtn');
+        btn.textContent = showcaseSortAscending ? '↑' : '↓';
+        loadCodesForSelect();
+    }
+    
+    function sortFilesByNumber(urls) {
+        return urls.sort((a, b) => {
+            const numA = parseInt(a);
+            const numB = parseInt(b);
+            if (!isNaN(numA) && !isNaN(numB)) {
+                return numA - numB;
+            }
+            return a.localeCompare(b);
+        });
+    }
+    
+    function sortAdminPhotosByNumber() {
+        adminUploadedUrls = sortFilesByNumber(adminUploadedUrls);
+        renderPhotoList('adminPhotoList', adminUploadedUrls);
+    }
+    
+    function sortWorkerPhotosByNumber() {
+        workerUploadedUrls = sortFilesByNumber(workerUploadedUrls);
+        renderPhotoList('workerPhotoList', workerUploadedUrls);
+    }
+    
+    function sortAssistantPhotosByNumber() {
+        assistantUploadedUrls = sortFilesByNumber(assistantUploadedUrls);
+        renderPhotoList('assistantPhotoList', assistantUploadedUrls);
     }
     
     function isVideo(url) {
@@ -3272,6 +3353,10 @@
                 }
                 return a.code.localeCompare(b.code);
             });
+            
+            if (!showcaseSortAscending) {
+                codesArray.reverse();
+            }
             
             select.innerHTML = '<option value="">Выберите код</option>';
             codesArray.forEach(item => {
@@ -4402,7 +4487,7 @@
                 adminEditCodeName = code;
                 adminUploadedUrls = doc.data().photos || [];
                 document.getElementById('adminCodeName').value = code;
-                renderAdminPhotoList();
+                renderPhotoList('adminPhotoList', adminUploadedUrls);
                 showMessage('adminMessage', `Редактирование кода: ${code}. Добавьте новые файлы или удалите лишние.`, 'success');
             }
         } catch (error) {
@@ -4416,33 +4501,11 @@
         adminEditCodeName = null;
         adminUploadedUrls = [];
         document.getElementById('adminCodeName').value = '';
-        renderAdminPhotoList();
+        renderPhotoList('adminPhotoList', adminUploadedUrls);
     }
     
     function renderAdminPhotoList() {
-        const container = document.getElementById('adminPhotoList');
-        if (adminUploadedUrls.length === 0) {
-            container.innerHTML = '<div style="text-align:center; padding:20px;">Нет файлов</div>';
-            return;
-        }
-        
-        let html = '';
-        for (let i = 0; i < adminUploadedUrls.length; i++) {
-            const url = adminUploadedUrls[i];
-            const isVideoFile = isVideo(url);
-            
-            html += `
-                <div class="photo-item">
-                    ${isVideoFile ? 
-                        `<video src="${url}" muted preload="metadata" style="width:40px; height:40px; object-fit:cover; border-radius:8px; background:#000;"></video>` :
-                        `<img src="${url}">`
-                    }
-                    <span>Файл ${i + 1}</span>
-                    <button onclick="removeAdminPhoto(${i})">✖</button>
-                </div>
-            `;
-        }
-        container.innerHTML = html;
+        renderPhotoList('adminPhotoList', adminUploadedUrls);
     }
     
     function removeAdminPhoto(index) {
@@ -4491,7 +4554,7 @@
             });
             
             adminUploadedUrls = [];
-            renderAdminPhotoList();
+            renderPhotoList('adminPhotoList', adminUploadedUrls);
             document.getElementById('adminCodeName').value = '';
             exitAdminEditMode();
             await loadAllCodes();
@@ -4522,7 +4585,7 @@
             const url = await uploadToGitHub(file);
             if (url) {
                 adminUploadedUrls.push(url);
-                renderAdminPhotoList();
+                renderPhotoList('adminPhotoList', adminUploadedUrls);
             }
             uploadArea.innerHTML = originalText;
         }
@@ -4535,6 +4598,12 @@
         const dropArea = document.getElementById('adminUploadArea');
         const fileInput = document.getElementById('adminFileInput');
         if (!dropArea) return;
+        
+        // На мобильных устройствах разрешаем выбирать до 60 файлов
+        if (isMobile()) {
+            fileInput.setAttribute('multiple', '');
+            fileInput.setAttribute('webkitdirectory', '');
+        }
         
         dropArea.ondragover = (e) => {
             e.preventDefault();
@@ -4562,39 +4631,19 @@
         
         const uploadArea = document.getElementById('workerUploadArea');
         const originalText = uploadArea.innerHTML;
-        uploadArea.innerHTML = `Загрузка ${imageFiles.length} файлов... <span class="loading"></span>`;
         
-        const uploadPromises = imageFiles.map(async (file) => {
-            const formData = new FormData();
-            formData.append('file', file);
-            
-            try {
-                const response = await fetch(WORKER_URL, {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await response.json();
-                if (data.url) {
-                    return data.url;
-                }
-                return null;
-            } catch (error) {
-                console.error('Ошибка загрузки файла:', file.name, error);
-                return null;
+        for (let i = 0; i < imageFiles.length; i++) {
+            const file = imageFiles[i];
+            uploadArea.innerHTML = `Загрузка ${i + 1}/${imageFiles.length}: ${file.name.substring(0, 30)}... <span class="loading"></span>`;
+            const url = await uploadToGitHub(file);
+            if (url) {
+                workerUploadedUrls.push(url);
+                renderPhotoList('workerPhotoList', workerUploadedUrls);
             }
-        });
-        
-        const urls = await Promise.all(uploadPromises);
-        const newUrls = urls.filter(url => url !== null);
-        workerUploadedUrls.push(...newUrls);
-        
-        uploadArea.innerHTML = originalText;
-        renderWorkerPhotoList();
-        
-        if (newUrls.length > 0) {
-            showMessage('workerMessage', `Загружено ${newUrls.length} файлов`, 'success');
-        } else if (imageFiles.length > 0) {
-            showMessage('workerMessage', 'Не удалось загрузить файлы. Попробуйте ещё раз.', 'error');
+            uploadArea.innerHTML = originalText;
+        }
+        if (imageFiles.length > 0) {
+            showMessage('workerMessage', `Загружено ${workerUploadedUrls.length} файлов`, 'success');
         }
     }
     
@@ -4602,6 +4651,11 @@
         const dropArea = document.getElementById('workerUploadArea');
         const fileInput = document.getElementById('workerFileInput');
         if (!dropArea) return;
+        
+        if (isMobile()) {
+            fileInput.setAttribute('multiple', '');
+            fileInput.setAttribute('webkitdirectory', '');
+        }
         
         dropArea.ondragover = (e) => {
             e.preventDefault();
@@ -4623,29 +4677,7 @@
     }
     
     function renderWorkerPhotoList() {
-        const container = document.getElementById('workerPhotoList');
-        if (workerUploadedUrls.length === 0) {
-            container.innerHTML = '<div style="text-align:center; padding:20px;">Нет файлов</div>';
-            return;
-        }
-        
-        let html = '';
-        for (let i = 0; i < workerUploadedUrls.length; i++) {
-            const url = workerUploadedUrls[i];
-            const isVideoFile = isVideo(url);
-            
-            html += `
-                <div class="photo-item">
-                    ${isVideoFile ? 
-                        `<video src="${url}" muted preload="metadata" style="width:40px; height:40px; object-fit:cover; border-radius:8px; background:#000;"></video>` :
-                        `<img src="${url}">`
-                    }
-                    <span>Файл ${i + 1}</span>
-                    <button onclick="removeWorkerPhoto(${i})">✖</button>
-                </div>
-            `;
-        }
-        container.innerHTML = html;
+        renderPhotoList('workerPhotoList', workerUploadedUrls);
     }
     
     function removeWorkerPhoto(index) {
@@ -4660,39 +4692,19 @@
         
         const uploadArea = document.getElementById('assistantUploadArea');
         const originalText = uploadArea.innerHTML;
-        uploadArea.innerHTML = `Загрузка ${imageFiles.length} файлов... <span class="loading"></span>`;
         
-        const uploadPromises = imageFiles.map(async (file) => {
-            const formData = new FormData();
-            formData.append('file', file);
-            
-            try {
-                const response = await fetch(WORKER_URL, {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await response.json();
-                if (data.url) {
-                    return data.url;
-                }
-                return null;
-            } catch (error) {
-                console.error('Ошибка загрузки файла:', file.name, error);
-                return null;
+        for (let i = 0; i < imageFiles.length; i++) {
+            const file = imageFiles[i];
+            uploadArea.innerHTML = `Загрузка ${i + 1}/${imageFiles.length}: ${file.name.substring(0, 30)}... <span class="loading"></span>`;
+            const url = await uploadToGitHub(file);
+            if (url) {
+                assistantUploadedUrls.push(url);
+                renderPhotoList('assistantPhotoList', assistantUploadedUrls);
             }
-        });
-        
-        const urls = await Promise.all(uploadPromises);
-        const newUrls = urls.filter(url => url !== null);
-        assistantUploadedUrls.push(...newUrls);
-        
-        uploadArea.innerHTML = originalText;
-        renderAssistantPhotoList();
-        
-        if (newUrls.length > 0) {
-            showMessage('assistantMessage', `Загружено ${newUrls.length} файлов`, 'success');
-        } else if (imageFiles.length > 0) {
-            showMessage('assistantMessage', 'Не удалось загрузить файлы. Попробуйте ещё раз.', 'error');
+            uploadArea.innerHTML = originalText;
+        }
+        if (imageFiles.length > 0) {
+            showMessage('assistantMessage', `Загружено ${assistantUploadedUrls.length} файлов`, 'success');
         }
     }
     
@@ -4700,6 +4712,11 @@
         const dropArea = document.getElementById('assistantUploadArea');
         const fileInput = document.getElementById('assistantFileInput');
         if (!dropArea) return;
+        
+        if (isMobile()) {
+            fileInput.setAttribute('multiple', '');
+            fileInput.setAttribute('webkitdirectory', '');
+        }
         
         dropArea.ondragover = (e) => {
             e.preventDefault();
@@ -4721,15 +4738,26 @@
     }
     
     function renderAssistantPhotoList() {
-        const container = document.getElementById('assistantPhotoList');
-        if (assistantUploadedUrls.length === 0) {
+        renderPhotoList('assistantPhotoList', assistantUploadedUrls);
+    }
+    
+    function removeAssistantPhoto(index) {
+        assistantUploadedUrls.splice(index, 1);
+        renderAssistantPhotoList();
+    }
+    
+    function renderPhotoList(containerId, urls) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        
+        if (urls.length === 0) {
             container.innerHTML = '<div style="text-align:center; padding:20px;">Нет файлов</div>';
             return;
         }
         
         let html = '';
-        for (let i = 0; i < assistantUploadedUrls.length; i++) {
-            const url = assistantUploadedUrls[i];
+        for (let i = 0; i < urls.length; i++) {
+            const url = urls[i];
             const isVideoFile = isVideo(url);
             
             html += `
@@ -4739,16 +4767,24 @@
                         `<img src="${url}">`
                     }
                     <span>Файл ${i + 1}</span>
-                    <button onclick="removeAssistantPhoto(${i})">✖</button>
+                    <button onclick="removePhotoFromList('${containerId}', ${i})">✖</button>
                 </div>
             `;
         }
         container.innerHTML = html;
     }
     
-    function removeAssistantPhoto(index) {
-        assistantUploadedUrls.splice(index, 1);
-        renderAssistantPhotoList();
+    function removePhotoFromList(containerId, index) {
+        if (containerId === 'adminPhotoList') {
+            adminUploadedUrls.splice(index, 1);
+            renderPhotoList(containerId, adminUploadedUrls);
+        } else if (containerId === 'workerPhotoList') {
+            workerUploadedUrls.splice(index, 1);
+            renderPhotoList(containerId, workerUploadedUrls);
+        } else if (containerId === 'assistantPhotoList') {
+            assistantUploadedUrls.splice(index, 1);
+            renderPhotoList(containerId, assistantUploadedUrls);
+        }
     }
     
     async function sendRequest(role) {
