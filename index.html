@@ -2948,12 +2948,14 @@
     // === ФУНКЦИЯ СОРТИРОВКИ ПО НОМЕРУ В НАЗВАНИИ ===
     function sortUrlsByNumber(urls) {
         return urls.slice().sort((a, b) => {
+            // Извлекаем имя файла из URL
             const getName = (url) => {
                 const parts = url.split('/');
                 return parts[parts.length - 1] || '';
             };
             const nameA = getName(a);
             const nameB = getName(b);
+            // Пробуем извлечь число из начала имени
             const numA = parseInt(nameA);
             const numB = parseInt(nameB);
             if (!isNaN(numA) && !isNaN(numB)) {
@@ -2964,33 +2966,21 @@
     }
     
     function sortAdminPhotosByNumber() {
-        if (adminUploadedUrls.length === 0) {
-            showMessage('adminMessage', 'Нет файлов для сортировки', 'error');
-            return;
-        }
         adminUploadedUrls = sortUrlsByNumber(adminUploadedUrls);
         renderPhotoList('adminPhotoList', adminUploadedUrls);
-        showMessage('adminMessage', '✅ Файлы отсортированы по номеру!', 'success');
+        showMessage('adminMessage', 'Файлы отсортированы по номеру', 'success');
     }
     
     function sortWorkerPhotosByNumber() {
-        if (workerUploadedUrls.length === 0) {
-            showMessage('workerMessage', 'Нет файлов для сортировки', 'error');
-            return;
-        }
         workerUploadedUrls = sortUrlsByNumber(workerUploadedUrls);
         renderPhotoList('workerPhotoList', workerUploadedUrls);
-        showMessage('workerMessage', '✅ Файлы отсортированы по номеру!', 'success');
+        showMessage('workerMessage', 'Файлы отсортированы по номеру', 'success');
     }
     
     function sortAssistantPhotosByNumber() {
-        if (assistantUploadedUrls.length === 0) {
-            showMessage('assistantMessage', 'Нет файлов для сортировки', 'error');
-            return;
-        }
         assistantUploadedUrls = sortUrlsByNumber(assistantUploadedUrls);
         renderPhotoList('assistantPhotoList', assistantUploadedUrls);
-        showMessage('assistantMessage', '✅ Файлы отсортированы по номеру!', 'success');
+        showMessage('assistantMessage', 'Файлы отсортированы по номеру', 'success');
     }
     
     function isVideo(url) {
@@ -4167,7 +4157,7 @@
         }
     }
     
-    // === ФУНКЦИЯ ЗАГРУЗКИ ФАЙЛОВ (ПОСЛЕДОВАТЕЛЬНАЯ) ===
+    // === ФУНКЦИЯ ЗАГРУЗКИ ФАЙЛОВ С СОРТИРОВКОЙ ===
     async function uploadFilesToGitHub(files, urlsArray, photoListId, messageId, uploadAreaId) {
         const fileArray = Array.from(files);
         const imageFiles = fileArray.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
@@ -4179,67 +4169,41 @@
         const uploadArea = document.getElementById(uploadAreaId);
         const originalText = uploadArea.innerHTML;
         
-        // Показываем загрузку
         uploadArea.innerHTML = `Загрузка ${imageFiles.length} файлов... <span class="loading"></span>`;
-        uploadArea.style.opacity = '0.7';
-        uploadArea.style.pointerEvents = 'none';
         
         let successCount = 0;
-        let errorCount = 0;
-        const newUrls = [];
-        
-        // === ПОСЛЕДОВАТЕЛЬНАЯ ЗАГРУЗКА ===
-        for (let i = 0; i < imageFiles.length; i++) {
-            const file = imageFiles[i];
-            // Обновляем прогресс
-            uploadArea.innerHTML = `Загрузка ${i + 1}/${imageFiles.length}: ${file.name.substring(0, 30)}... <span class="loading"></span>`;
+        const uploadPromises = imageFiles.map(async (file) => {
+            const formData = new FormData();
+            formData.append('file', file);
             
             try {
-                const formData = new FormData();
-                formData.append('file', file);
-                
                 const response = await fetch(WORKER_URL, {
                     method: 'POST',
                     body: formData
                 });
-                
                 const data = await response.json();
                 if (data.url) {
-                    newUrls.push(data.url);
                     successCount++;
-                } else {
-                    errorCount++;
-                    console.error('Ошибка загрузки файла:', file.name, data);
+                    return data.url;
                 }
+                return null;
             } catch (error) {
-                errorCount++;
                 console.error('Ошибка загрузки файла:', file.name, error);
+                return null;
             }
-            
-            // Небольшая задержка между файлами, чтобы не перегружать воркер
-            if (i < imageFiles.length - 1) {
-                await new Promise(resolve => setTimeout(resolve, 300));
-            }
-        }
+        });
         
-        // === ВСЕ ФАЙЛЫ ЗАГРУЖЕНЫ ===
+        const urls = await Promise.all(uploadPromises);
+        const newUrls = urls.filter(url => url !== null);
         urlsArray.push(...newUrls);
         
-        // Восстанавливаем интерфейс
         uploadArea.innerHTML = originalText;
-        uploadArea.style.opacity = '1';
-        uploadArea.style.pointerEvents = 'auto';
-        
-        // Обновляем список фото
         renderPhotoList(photoListId, urlsArray);
         
-        // Показываем сообщение
-        if (successCount > 0 && errorCount === 0) {
-            showMessage(messageId, `✅ Загружено ${successCount} файлов!`, 'success');
-        } else if (successCount > 0 && errorCount > 0) {
-            showMessage(messageId, `✅ Загружено ${successCount} файлов, ❌ ошибок: ${errorCount}`, 'error');
-        } else {
-            showMessage(messageId, '❌ Не удалось загрузить файлы. Попробуйте ещё раз.', 'error');
+        if (newUrls.length > 0) {
+            showMessage(messageId, `Загружено ${newUrls.length} файлов (всего ${urlsArray.length})`, 'success');
+        } else if (imageFiles.length > 0) {
+            showMessage(messageId, 'Не удалось загрузить файлы. Попробуйте ещё раз.', 'error');
         }
     }
     
@@ -4705,12 +4669,17 @@
         }
     }
     
-    // === ОБРАБОТЧИКИ ДЛЯ ЗАГРУЗКИ ФАЙЛОВ ===
+    // ===== ИСПРАВЛЕННЫЕ ФУНКЦИИ ЗАГРУЗКИ (убрана лишняя установка текста) =====
     async function handleAdminFiles(files) {
-        const uploadArea = document.getElementById('adminUploadArea');
-        const originalText = uploadArea.innerHTML;
-        uploadArea.innerHTML = `Загрузка... <span class="loading"></span>`;
         await uploadFilesToGitHub(files, adminUploadedUrls, 'adminPhotoList', 'adminMessage', 'adminUploadArea');
+    }
+    
+    async function handleWorkerFiles(files) {
+        await uploadFilesToGitHub(files, workerUploadedUrls, 'workerPhotoList', 'workerMessage', 'workerUploadArea');
+    }
+    
+    async function handleAssistantFiles(files) {
+        await uploadFilesToGitHub(files, assistantUploadedUrls, 'assistantPhotoList', 'assistantMessage', 'assistantUploadArea');
     }
     
     function setupAdminDragAndDrop() {
@@ -4740,13 +4709,6 @@
             await handleAdminFiles(e.target.files);
             fileInput.value = '';
         };
-    }
-    
-    async function handleWorkerFiles(files) {
-        const uploadArea = document.getElementById('workerUploadArea');
-        const originalText = uploadArea.innerHTML;
-        uploadArea.innerHTML = `Загрузка... <span class="loading"></span>`;
-        await uploadFilesToGitHub(files, workerUploadedUrls, 'workerPhotoList', 'workerMessage', 'workerUploadArea');
     }
     
     function setupWorkerDragAndDrop() {
@@ -4785,13 +4747,6 @@
     function removeWorkerPhoto(index) {
         workerUploadedUrls.splice(index, 1);
         renderWorkerPhotoList();
-    }
-    
-    async function handleAssistantFiles(files) {
-        const uploadArea = document.getElementById('assistantUploadArea');
-        const originalText = uploadArea.innerHTML;
-        uploadArea.innerHTML = `Загрузка... <span class="loading"></span>`;
-        await uploadFilesToGitHub(files, assistantUploadedUrls, 'assistantPhotoList', 'assistantMessage', 'assistantUploadArea');
     }
     
     function setupAssistantDragAndDrop() {
