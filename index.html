@@ -2404,7 +2404,7 @@
             }
         }
 
-        /* ===== КНОПКА СОРТИРОВКИ ПО НОМЕРУ ===== */
+        /* ===== КНОПКА СОРТИРОВКИ ПО НОМЕРУ (только для ПК) ===== */
         .sort-number-btn {
             background: #585149;
             color: #f0ede5;
@@ -2425,15 +2425,7 @@
         }
         @media (max-width: 600px) {
             .sort-number-btn {
-                padding: 6px 12px;
-                font-size: 11px;
-                transition: background 0.3s ease;
-            }
-            .sort-number-btn:hover {
-                transform: none;
-            }
-            .sort-number-btn:active {
-                transform: none;
+                display: none;
             }
         }
     </style>
@@ -2546,6 +2538,7 @@
         
         <div id="adminPhotoList" class="photos-list"></div>
         
+        <!-- Кнопка сортировки (только на ПК) -->
         <div style="display: flex; gap: 8px; margin: 10px 0; flex-wrap: wrap; align-items: center;">
             <button class="sort-number-btn" onclick="sortAdminPhotosByNumber()">Сортировать по номеру</button>
         </div>
@@ -2650,6 +2643,7 @@
     
     <div id="workerPhotoList" class="photos-list"></div>
     
+    <!-- Кнопка сортировки (только на ПК) -->
     <div style="display: flex; gap: 8px; margin: 10px 0; flex-wrap: wrap; align-items: center;">
         <button class="sort-number-btn" onclick="sortWorkerPhotosByNumber()">Сортировать по номеру</button>
     </div>
@@ -2675,6 +2669,7 @@
     
     <div id="assistantPhotoList" class="photos-list"></div>
     
+    <!-- Кнопка сортировки (только на ПК) -->
     <div style="display: flex; gap: 8px; margin: 10px 0; flex-wrap: wrap; align-items: center;">
         <button class="sort-number-btn" onclick="sortAssistantPhotosByNumber()">Сортировать по номеру</button>
     </div>
@@ -2950,30 +2945,42 @@
         loadCodesForSelect();
     }
     
-    function sortFilesByNumber(urls) {
-        return urls.sort((a, b) => {
-            const numA = parseInt(a);
-            const numB = parseInt(b);
+    // === ФУНКЦИЯ СОРТИРОВКИ ПО НОМЕРУ В НАЗВАНИИ ===
+    function sortUrlsByNumber(urls) {
+        return urls.slice().sort((a, b) => {
+            // Извлекаем имя файла из URL
+            const getName = (url) => {
+                const parts = url.split('/');
+                return parts[parts.length - 1] || '';
+            };
+            const nameA = getName(a);
+            const nameB = getName(b);
+            // Пробуем извлечь число из начала имени
+            const numA = parseInt(nameA);
+            const numB = parseInt(nameB);
             if (!isNaN(numA) && !isNaN(numB)) {
                 return numA - numB;
             }
-            return a.localeCompare(b);
+            return nameA.localeCompare(nameB);
         });
     }
     
     function sortAdminPhotosByNumber() {
-        adminUploadedUrls = sortFilesByNumber(adminUploadedUrls);
+        adminUploadedUrls = sortUrlsByNumber(adminUploadedUrls);
         renderPhotoList('adminPhotoList', adminUploadedUrls);
+        showMessage('adminMessage', 'Файлы отсортированы по номеру', 'success');
     }
     
     function sortWorkerPhotosByNumber() {
-        workerUploadedUrls = sortFilesByNumber(workerUploadedUrls);
+        workerUploadedUrls = sortUrlsByNumber(workerUploadedUrls);
         renderPhotoList('workerPhotoList', workerUploadedUrls);
+        showMessage('workerMessage', 'Файлы отсортированы по номеру', 'success');
     }
     
     function sortAssistantPhotosByNumber() {
-        assistantUploadedUrls = sortFilesByNumber(assistantUploadedUrls);
+        assistantUploadedUrls = sortUrlsByNumber(assistantUploadedUrls);
         renderPhotoList('assistantPhotoList', assistantUploadedUrls);
+        showMessage('assistantMessage', 'Файлы отсортированы по номеру', 'success');
     }
     
     function isVideo(url) {
@@ -4150,6 +4157,97 @@
         }
     }
     
+    // === ФУНКЦИЯ ЗАГРУЗКИ ФАЙЛОВ С СОРТИРОВКОЙ ===
+    async function uploadFilesToGitHub(files, urlsArray, photoListId, messageId, uploadAreaId) {
+        const fileArray = Array.from(files);
+        const imageFiles = fileArray.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
+        if (imageFiles.length === 0) {
+            showMessage(messageId, 'Нет подходящих файлов (изображения или видео)', 'error');
+            return;
+        }
+        
+        const uploadArea = document.getElementById(uploadAreaId);
+        const originalText = uploadArea.innerHTML;
+        
+        uploadArea.innerHTML = `Загрузка ${imageFiles.length} файлов... <span class="loading"></span>`;
+        
+        let successCount = 0;
+        const uploadPromises = imageFiles.map(async (file) => {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                if (data.url) {
+                    successCount++;
+                    return data.url;
+                }
+                return null;
+            } catch (error) {
+                console.error('Ошибка загрузки файла:', file.name, error);
+                return null;
+            }
+        });
+        
+        const urls = await Promise.all(uploadPromises);
+        const newUrls = urls.filter(url => url !== null);
+        urlsArray.push(...newUrls);
+        
+        uploadArea.innerHTML = originalText;
+        renderPhotoList(photoListId, urlsArray);
+        
+        if (newUrls.length > 0) {
+            showMessage(messageId, `Загружено ${newUrls.length} файлов (всего ${urlsArray.length})`, 'success');
+        } else if (imageFiles.length > 0) {
+            showMessage(messageId, 'Не удалось загрузить файлы. Попробуйте ещё раз.', 'error');
+        }
+    }
+    
+    function renderPhotoList(containerId, urls) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        
+        if (urls.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:20px;">Нет файлов</div>';
+            return;
+        }
+        
+        let html = '';
+        for (let i = 0; i < urls.length; i++) {
+            const url = urls[i];
+            const isVideoFile = isVideo(url);
+            
+            html += `
+                <div class="photo-item">
+                    ${isVideoFile ? 
+                        `<video src="${url}" muted preload="metadata" style="width:40px; height:40px; object-fit:cover; border-radius:8px; background:#000;"></video>` :
+                        `<img src="${url}">`
+                    }
+                    <span>Файл ${i + 1}</span>
+                    <button onclick="removePhotoFromList('${containerId}', ${i})">✖</button>
+                </div>
+            `;
+        }
+        container.innerHTML = html;
+    }
+    
+    function removePhotoFromList(containerId, index) {
+        if (containerId === 'adminPhotoList') {
+            adminUploadedUrls.splice(index, 1);
+            renderPhotoList(containerId, adminUploadedUrls);
+        } else if (containerId === 'workerPhotoList') {
+            workerUploadedUrls.splice(index, 1);
+            renderPhotoList(containerId, workerUploadedUrls);
+        } else if (containerId === 'assistantPhotoList') {
+            assistantUploadedUrls.splice(index, 1);
+            renderPhotoList(containerId, assistantUploadedUrls);
+        }
+    }
+    
     async function uploadToGitHub(file) {
         const formData = new FormData();
         formData.append('file', file);
@@ -4572,26 +4670,10 @@
     }
     
     async function handleAdminFiles(files) {
-        const fileArray = Array.from(files);
-        const imageFiles = fileArray.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
-        if (imageFiles.length === 0) return;
-        
         const uploadArea = document.getElementById('adminUploadArea');
         const originalText = uploadArea.innerHTML;
-        
-        for (let i = 0; i < imageFiles.length; i++) {
-            const file = imageFiles[i];
-            uploadArea.innerHTML = `Загрузка ${i + 1}/${imageFiles.length}: ${file.name.substring(0, 30)}... <span class="loading"></span>`;
-            const url = await uploadToGitHub(file);
-            if (url) {
-                adminUploadedUrls.push(url);
-                renderPhotoList('adminPhotoList', adminUploadedUrls);
-            }
-            uploadArea.innerHTML = originalText;
-        }
-        if (imageFiles.length > 0) {
-            showMessage('adminMessage', `Загружено ${adminUploadedUrls.length} файлов`, 'success');
-        }
+        uploadArea.innerHTML = `Загрузка... <span class="loading"></span>`;
+        await uploadFilesToGitHub(files, adminUploadedUrls, 'adminPhotoList', 'adminMessage', 'adminUploadArea');
     }
     
     function setupAdminDragAndDrop() {
@@ -4599,7 +4681,6 @@
         const fileInput = document.getElementById('adminFileInput');
         if (!dropArea) return;
         
-        // На мобильных устройствах разрешаем выбирать до 60 файлов
         if (isMobile()) {
             fileInput.setAttribute('multiple', '');
             fileInput.setAttribute('webkitdirectory', '');
@@ -4625,26 +4706,10 @@
     }
     
     async function handleWorkerFiles(files) {
-        const fileArray = Array.from(files);
-        const imageFiles = fileArray.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
-        if (imageFiles.length === 0) return;
-        
         const uploadArea = document.getElementById('workerUploadArea');
         const originalText = uploadArea.innerHTML;
-        
-        for (let i = 0; i < imageFiles.length; i++) {
-            const file = imageFiles[i];
-            uploadArea.innerHTML = `Загрузка ${i + 1}/${imageFiles.length}: ${file.name.substring(0, 30)}... <span class="loading"></span>`;
-            const url = await uploadToGitHub(file);
-            if (url) {
-                workerUploadedUrls.push(url);
-                renderPhotoList('workerPhotoList', workerUploadedUrls);
-            }
-            uploadArea.innerHTML = originalText;
-        }
-        if (imageFiles.length > 0) {
-            showMessage('workerMessage', `Загружено ${workerUploadedUrls.length} файлов`, 'success');
-        }
+        uploadArea.innerHTML = `Загрузка... <span class="loading"></span>`;
+        await uploadFilesToGitHub(files, workerUploadedUrls, 'workerPhotoList', 'workerMessage', 'workerUploadArea');
     }
     
     function setupWorkerDragAndDrop() {
@@ -4686,26 +4751,10 @@
     }
     
     async function handleAssistantFiles(files) {
-        const fileArray = Array.from(files);
-        const imageFiles = fileArray.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
-        if (imageFiles.length === 0) return;
-        
         const uploadArea = document.getElementById('assistantUploadArea');
         const originalText = uploadArea.innerHTML;
-        
-        for (let i = 0; i < imageFiles.length; i++) {
-            const file = imageFiles[i];
-            uploadArea.innerHTML = `Загрузка ${i + 1}/${imageFiles.length}: ${file.name.substring(0, 30)}... <span class="loading"></span>`;
-            const url = await uploadToGitHub(file);
-            if (url) {
-                assistantUploadedUrls.push(url);
-                renderPhotoList('assistantPhotoList', assistantUploadedUrls);
-            }
-            uploadArea.innerHTML = originalText;
-        }
-        if (imageFiles.length > 0) {
-            showMessage('assistantMessage', `Загружено ${assistantUploadedUrls.length} файлов`, 'success');
-        }
+        uploadArea.innerHTML = `Загрузка... <span class="loading"></span>`;
+        await uploadFilesToGitHub(files, assistantUploadedUrls, 'assistantPhotoList', 'assistantMessage', 'assistantUploadArea');
     }
     
     function setupAssistantDragAndDrop() {
@@ -4744,47 +4793,6 @@
     function removeAssistantPhoto(index) {
         assistantUploadedUrls.splice(index, 1);
         renderAssistantPhotoList();
-    }
-    
-    function renderPhotoList(containerId, urls) {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-        
-        if (urls.length === 0) {
-            container.innerHTML = '<div style="text-align:center; padding:20px;">Нет файлов</div>';
-            return;
-        }
-        
-        let html = '';
-        for (let i = 0; i < urls.length; i++) {
-            const url = urls[i];
-            const isVideoFile = isVideo(url);
-            
-            html += `
-                <div class="photo-item">
-                    ${isVideoFile ? 
-                        `<video src="${url}" muted preload="metadata" style="width:40px; height:40px; object-fit:cover; border-radius:8px; background:#000;"></video>` :
-                        `<img src="${url}">`
-                    }
-                    <span>Файл ${i + 1}</span>
-                    <button onclick="removePhotoFromList('${containerId}', ${i})">✖</button>
-                </div>
-            `;
-        }
-        container.innerHTML = html;
-    }
-    
-    function removePhotoFromList(containerId, index) {
-        if (containerId === 'adminPhotoList') {
-            adminUploadedUrls.splice(index, 1);
-            renderPhotoList(containerId, adminUploadedUrls);
-        } else if (containerId === 'workerPhotoList') {
-            workerUploadedUrls.splice(index, 1);
-            renderPhotoList(containerId, workerUploadedUrls);
-        } else if (containerId === 'assistantPhotoList') {
-            assistantUploadedUrls.splice(index, 1);
-            renderPhotoList(containerId, assistantUploadedUrls);
-        }
     }
     
     async function sendRequest(role) {
