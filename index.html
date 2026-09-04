@@ -1251,6 +1251,52 @@
             }
         }
         
+        .photo-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+        
+        .photo-list-header .sort-photos-btn {
+            background: #585149;
+            color: #f0ede5;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            touch-action: manipulation;
+            white-space: nowrap;
+        }
+        
+        .photo-list-header .sort-photos-btn:hover {
+            background: #6b6258;
+            transform: translateY(-1px) scale(1.05);
+            box-shadow: 0 2px 10px rgba(88, 81, 73, 0.2);
+        }
+        
+        .photo-list-header .sort-photos-btn:active {
+            transform: scale(0.95);
+        }
+        
+        @media (max-width: 600px) {
+            .photo-list-header .sort-photos-btn {
+                font-size: 11px;
+                padding: 5px 12px;
+                transition: background 0.3s ease;
+            }
+            .photo-list-header .sort-photos-btn:hover {
+                transform: none;
+            }
+            .photo-list-header .sort-photos-btn:active {
+                transform: none;
+            }
+        }
+        
         .code-input {
             width: 100%;
             padding: 12px 15px;
@@ -2534,6 +2580,10 @@
         </div>
         <input type="file" id="adminFileInput" multiple accept="image/*,video/*" style="display:none">
         
+        <div class="photo-list-header">
+            <span style="font-size: 14px; color: #585149; font-weight: 500;">Загруженные файлы:</span>
+            <button class="sort-photos-btn" onclick="sortAdminPhotos()">Сортировать по номеру</button>
+        </div>
         <div id="adminPhotoList" class="photos-list"></div>
         
         <h3>2. Введите код для этих параметров</h3>
@@ -2636,6 +2686,10 @@
     </div>
     <input type="file" id="workerFileInput" multiple accept="image/*,video/*" style="display:none">
     
+    <div class="photo-list-header">
+        <span style="font-size: 14px; color: #585149; font-weight: 500;">Загруженные файлы:</span>
+        <button class="sort-photos-btn" onclick="sortWorkerPhotos()">Сортировать по номеру</button>
+    </div>
     <div id="workerPhotoList" class="photos-list"></div>
     
     <h3>2. Введите код для этих параметров</h3>
@@ -2657,6 +2711,10 @@
     </div>
     <input type="file" id="assistantFileInput" multiple accept="image/*,video/*" style="display:none">
     
+    <div class="photo-list-header">
+        <span style="font-size: 14px; color: #585149; font-weight: 500;">Загруженные файлы:</span>
+        <button class="sort-photos-btn" onclick="sortAssistantPhotos()">Сортировать по номеру</button>
+    </div>
     <div id="assistantPhotoList" class="photos-list"></div>
     
     <h3>2. Введите код для этих параметров</h3>
@@ -2858,7 +2916,7 @@
     let allCodesData = [];
     let codesSortType = 'date';
     let sortAscending = true;
-    let showcaseSortAscending = true; // для сортировки в витрине
+    let showcaseSortAscending = true;
     
     let allShowcaseCodes = [];
     
@@ -2923,12 +2981,64 @@
         renderCodesList();
     }
     
-    // Функция для сортировки выпадающего списка в витрине
     function toggleShowcaseSortDirection() {
         showcaseSortAscending = !showcaseSortAscending;
         const btn = document.getElementById('showcaseSortDirectionBtn');
         btn.textContent = showcaseSortAscending ? '↑' : '↓';
-        loadCodesForSelect(); // обновляем список без закрытия
+        loadCodesForSelect();
+    }
+    
+    // ===== ФУНКЦИИ СОРТИРОВКИ ФАЙЛОВ ПО НОМЕРУ =====
+    function extractNumberFromFilename(url) {
+        // Извлекаем имя файла из URL
+        const parts = url.split('/');
+        let filename = parts[parts.length - 1];
+        // Убираем параметры запроса, если есть
+        filename = filename.split('?')[0];
+        // Ищем число в имени файла
+        const match = filename.match(/(\d+)/);
+        if (match) {
+            return parseInt(match[0]);
+        }
+        return Infinity;
+    }
+    
+    function sortPhotosByNumber(urls) {
+        return urls.sort((a, b) => {
+            const numA = extractNumberFromFilename(a);
+            const numB = extractNumberFromFilename(b);
+            return numA - numB;
+        });
+    }
+    
+    function sortAdminPhotos() {
+        if (adminUploadedUrls.length === 0) {
+            showMessage('adminMessage', 'Нет файлов для сортировки', 'error');
+            return;
+        }
+        adminUploadedUrls = sortPhotosByNumber(adminUploadedUrls);
+        renderAdminPhotoList();
+        showMessage('adminMessage', 'Файлы отсортированы по номеру!', 'success');
+    }
+    
+    function sortWorkerPhotos() {
+        if (workerUploadedUrls.length === 0) {
+            showMessage('workerMessage', 'Нет файлов для сортировки', 'error');
+            return;
+        }
+        workerUploadedUrls = sortPhotosByNumber(workerUploadedUrls);
+        renderWorkerPhotoList();
+        showMessage('workerMessage', 'Файлы отсортированы по номеру!', 'success');
+    }
+    
+    function sortAssistantPhotos() {
+        if (assistantUploadedUrls.length === 0) {
+            showMessage('assistantMessage', 'Нет файлов для сортировки', 'error');
+            return;
+        }
+        assistantUploadedUrls = sortPhotosByNumber(assistantUploadedUrls);
+        renderAssistantPhotoList();
+        showMessage('assistantMessage', 'Файлы отсортированы по номеру!', 'success');
     }
     
     function isVideo(url) {
@@ -3300,13 +3410,12 @@
                 codesArray.push({ code, filesCount: files.length, isInShowcase });
             });
             
-            // Сортировка с учётом направления
             if (!showcaseSortAscending) {
                 codesArray.sort((a, b) => {
                     const numA = parseInt(a.code);
                     const numB = parseInt(b.code);
                     if (!isNaN(numA) && !isNaN(numB)) {
-                        return numB - numA; // убывание
+                        return numB - numA;
                     }
                     return b.code.localeCompare(a.code);
                 });
@@ -3315,7 +3424,7 @@
                     const numA = parseInt(a.code);
                     const numB = parseInt(b.code);
                     if (!isNaN(numA) && !isNaN(numB)) {
-                        return numA - numB; // возрастание
+                        return numA - numB;
                     }
                     return a.code.localeCompare(b.code);
                 });
@@ -4485,7 +4594,7 @@
                         `<video src="${url}" muted preload="metadata" style="width:40px; height:40px; object-fit:cover; border-radius:8px; background:#000;"></video>` :
                         `<img src="${url}">`
                     }
-                    <span>Файл ${i + 1}</span>
+                    <span>${i + 1}</span>
                     <button onclick="removeAdminPhoto(${i})">✖</button>
                 </div>
             `;
@@ -4688,7 +4797,7 @@
                         `<video src="${url}" muted preload="metadata" style="width:40px; height:40px; object-fit:cover; border-radius:8px; background:#000;"></video>` :
                         `<img src="${url}">`
                     }
-                    <span>Файл ${i + 1}</span>
+                    <span>${i + 1}</span>
                     <button onclick="removeWorkerPhoto(${i})">✖</button>
                 </div>
             `;
@@ -4786,7 +4895,7 @@
                         `<video src="${url}" muted preload="metadata" style="width:40px; height:40px; object-fit:cover; border-radius:8px; background:#000;"></video>` :
                         `<img src="${url}">`
                     }
-                    <span>Файл ${i + 1}</span>
+                    <span>${i + 1}</span>
                     <button onclick="removeAssistantPhoto(${i})">✖</button>
                 </div>
             `;
