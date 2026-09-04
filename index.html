@@ -1171,86 +1171,6 @@
             }
         }
         
-        .photos-list {
-            background: rgba(240, 237, 229, 0.8);
-            border-radius: 12px;
-            padding: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-            margin: 10px 0;
-        }
-        
-        .photo-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px;
-            background: rgba(255, 255, 255, 0.9);
-            margin: 6px 0;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-        }
-        
-        .photo-item:hover {
-            transform: translateX(4px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        
-        @media (max-width: 600px) {
-            .photo-item {
-                transition: box-shadow 0.3s ease;
-            }
-            .photo-item:hover {
-                transform: none;
-            }
-        }
-        
-        .photo-item img, .photo-item video {
-            width: 40px;
-            height: 40px;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-        
-        .photo-item span {
-            flex: 1;
-            font-size: 12px;
-            color: #585149;
-        }
-        
-        .photo-item button {
-            background: #c3a684;
-            border: none;
-            padding: 4px 10px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 11px;
-            color: #585149;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            touch-action: manipulation;
-        }
-        
-        .photo-item button:hover {
-            background: #b3926e;
-            transform: scale(1.1);
-        }
-        
-        .photo-item button:active {
-            transform: scale(0.9);
-        }
-        
-        @media (max-width: 600px) {
-            .photo-item button {
-                transition: background 0.3s ease;
-            }
-            .photo-item button:hover {
-                transform: none;
-            }
-            .photo-item button:active {
-                transform: none;
-            }
-        }
-        
         .photo-list-header {
             display: flex;
             justify-content: space-between;
@@ -1293,6 +1213,90 @@
                 transform: none;
             }
             .photo-list-header .sort-photos-btn:active {
+                transform: none;
+            }
+        }
+        
+        .photos-list {
+            background: rgba(240, 237, 229, 0.8);
+            border-radius: 12px;
+            padding: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        
+        .photo-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            margin: 6px 0;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .photo-item:hover {
+            transform: translateX(4px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        @media (max-width: 600px) {
+            .photo-item {
+                transition: box-shadow 0.3s ease;
+            }
+            .photo-item:hover {
+                transform: none;
+            }
+        }
+        
+        .photo-item img, .photo-item video {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 8px;
+            pointer-events: none;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+        
+        .photo-item span {
+            flex: 1;
+            font-size: 12px;
+            color: #585149;
+        }
+        
+        .photo-item button {
+            background: #c3a684;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 11px;
+            color: #585149;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            touch-action: manipulation;
+        }
+        
+        .photo-item button:hover {
+            background: #b3926e;
+            transform: scale(1.1);
+        }
+        
+        .photo-item button:active {
+            transform: scale(0.9);
+        }
+        
+        @media (max-width: 600px) {
+            .photo-item button {
+                transition: background 0.3s ease;
+            }
+            .photo-item button:hover {
+                transform: none;
+            }
+            .photo-item button:active {
                 transform: none;
             }
         }
@@ -2990,12 +2994,9 @@
     
     // ===== ФУНКЦИИ СОРТИРОВКИ ФАЙЛОВ ПО НОМЕРУ =====
     function extractNumberFromFilename(url) {
-        // Извлекаем имя файла из URL
         const parts = url.split('/');
         let filename = parts[parts.length - 1];
-        // Убираем параметры запроса, если есть
         filename = filename.split('?')[0];
-        // Ищем число в имени файла
         const match = filename.match(/(\d+)/);
         if (match) {
             return parseInt(match[0]);
@@ -3039,6 +3040,36 @@
         assistantUploadedUrls = sortPhotosByNumber(assistantUploadedUrls);
         renderAssistantPhotoList();
         showMessage('assistantMessage', 'Файлы отсортированы по номеру!', 'success');
+    }
+    
+    // ===== ФУНКЦИЯ ДЛЯ ОТКРЫТИЯ ФОТО В МОДАЛКЕ =====
+    function openPhotoModal(url) {
+        const modal = document.getElementById('modal');
+        const modalImg = document.getElementById('modalImage');
+        const videoPlayer = document.getElementById('videoPlayer');
+        const isVideoFile = isVideo(url);
+        
+        if (isVideoFile) {
+            modalImg.style.display = 'none';
+            videoPlayer.style.display = 'block';
+            videoPlayer.src = url;
+            videoPlayer.load();
+            videoPlayer.play();
+        } else {
+            modalImg.style.display = 'block';
+            videoPlayer.style.display = 'none';
+            videoPlayer.pause();
+            modalImg.src = url;
+        }
+        
+        currentPhotosList = [url];
+        currentPhotoIndex = 0;
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        resetZoom();
+        updateCounter();
+        updateArrows();
+        updateZoomHint();
     }
     
     function isVideo(url) {
@@ -4587,15 +4618,15 @@
         for (let i = 0; i < adminUploadedUrls.length; i++) {
             const url = adminUploadedUrls[i];
             const isVideoFile = isVideo(url);
+            const thumbnail = isVideoFile ? 
+                `<video src="${url}" muted preload="metadata" style="width:40px; height:40px; object-fit:cover; border-radius:8px; background:#000;" onclick="event.stopPropagation(); openPhotoModal('${url}')"></video>` :
+                `<img src="${url}" onclick="event.stopPropagation(); openPhotoModal('${url}')" loading="lazy" onerror="this.style.opacity='0.3'" style="cursor:pointer;">`;
             
             html += `
-                <div class="photo-item">
-                    ${isVideoFile ? 
-                        `<video src="${url}" muted preload="metadata" style="width:40px; height:40px; object-fit:cover; border-radius:8px; background:#000;"></video>` :
-                        `<img src="${url}">`
-                    }
+                <div class="photo-item" onclick="openPhotoModal('${url}')">
+                    ${thumbnail}
                     <span>${i + 1}</span>
-                    <button onclick="removeAdminPhoto(${i})">✖</button>
+                    <button onclick="event.stopPropagation(); removeAdminPhoto(${i})">✖</button>
                 </div>
             `;
         }
@@ -4790,15 +4821,15 @@
         for (let i = 0; i < workerUploadedUrls.length; i++) {
             const url = workerUploadedUrls[i];
             const isVideoFile = isVideo(url);
+            const thumbnail = isVideoFile ? 
+                `<video src="${url}" muted preload="metadata" style="width:40px; height:40px; object-fit:cover; border-radius:8px; background:#000;" onclick="event.stopPropagation(); openPhotoModal('${url}')"></video>` :
+                `<img src="${url}" onclick="event.stopPropagation(); openPhotoModal('${url}')" loading="lazy" onerror="this.style.opacity='0.3'" style="cursor:pointer;">`;
             
             html += `
-                <div class="photo-item">
-                    ${isVideoFile ? 
-                        `<video src="${url}" muted preload="metadata" style="width:40px; height:40px; object-fit:cover; border-radius:8px; background:#000;"></video>` :
-                        `<img src="${url}">`
-                    }
+                <div class="photo-item" onclick="openPhotoModal('${url}')">
+                    ${thumbnail}
                     <span>${i + 1}</span>
-                    <button onclick="removeWorkerPhoto(${i})">✖</button>
+                    <button onclick="event.stopPropagation(); removeWorkerPhoto(${i})">✖</button>
                 </div>
             `;
         }
@@ -4888,15 +4919,15 @@
         for (let i = 0; i < assistantUploadedUrls.length; i++) {
             const url = assistantUploadedUrls[i];
             const isVideoFile = isVideo(url);
+            const thumbnail = isVideoFile ? 
+                `<video src="${url}" muted preload="metadata" style="width:40px; height:40px; object-fit:cover; border-radius:8px; background:#000;" onclick="event.stopPropagation(); openPhotoModal('${url}')"></video>` :
+                `<img src="${url}" onclick="event.stopPropagation(); openPhotoModal('${url}')" loading="lazy" onerror="this.style.opacity='0.3'" style="cursor:pointer;">`;
             
             html += `
-                <div class="photo-item">
-                    ${isVideoFile ? 
-                        `<video src="${url}" muted preload="metadata" style="width:40px; height:40px; object-fit:cover; border-radius:8px; background:#000;"></video>` :
-                        `<img src="${url}">`
-                    }
+                <div class="photo-item" onclick="openPhotoModal('${url}')">
+                    ${thumbnail}
                     <span>${i + 1}</span>
-                    <button onclick="removeAssistantPhoto(${i})">✖</button>
+                    <button onclick="event.stopPropagation(); removeAssistantPhoto(${i})">✖</button>
                 </div>
             `;
         }
