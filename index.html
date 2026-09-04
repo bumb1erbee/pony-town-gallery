@@ -2403,6 +2403,29 @@
                 height: 16px;
             }
         }
+        
+        /* ===== ДОПОЛНИТЕЛЬНЫЕ СТИЛИ ДЛЯ ВЫПАДАЮЩЕГО СПИСКА В ВИТРИНЕ ===== */
+        .showcase-select-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .showcase-select-wrapper select {
+            flex: 1;
+            padding-right: 30px;
+        }
+        
+        .showcase-select-wrapper .sort-direction-btn {
+            flex-shrink: 0;
+            padding: 6px 10px;
+            font-size: 13px;
+        }
+        
+        .showcase-select-wrapper .sort-direction-btn:hover {
+            background: #b3926e;
+        }
     </style>
 </head>
 <body>
@@ -2563,7 +2586,12 @@
         
         <div class="add-showcase-area">
             <h4>Добавить скин в витрину</h4>
-            <select id="showcaseCodeSelect" class="code-input"></select>
+            
+            <div class="showcase-select-wrapper">
+                <select id="showcaseCodeSelect" class="code-input"></select>
+                <button class="sort-direction-btn" id="showcaseSortDirectionBtn" onclick="toggleShowcaseSortDirection()" title="Поменять направление сортировки">↑</button>
+            </div>
+            
             <div id="showcaseUploadArea" class="upload-area">
                 Перетащите картинку или нажмите для выбора
             </div>
@@ -2659,7 +2687,6 @@
         const starSymbols = ['✦', '✧', '⋆', '✦', '✧'];
         const starColor = '#c1a27f';
         const isMobile = window.innerWidth <= 600;
-        // На телефоне 20 звёзд, на ПК — 40
         const starCount = isMobile ? 20 : 40;
         
         for (let i = 0; i < starCount; i++) {
@@ -2831,6 +2858,7 @@
     let allCodesData = [];
     let codesSortType = 'date';
     let sortAscending = true;
+    let showcaseSortAscending = true; // для сортировки в витрине
     
     let allShowcaseCodes = [];
     
@@ -2893,6 +2921,14 @@
         const btn = document.getElementById('sortDirectionBtn');
         btn.textContent = sortAscending ? '↑' : '↓';
         renderCodesList();
+    }
+    
+    // Функция для сортировки выпадающего списка в витрине
+    function toggleShowcaseSortDirection() {
+        showcaseSortAscending = !showcaseSortAscending;
+        const btn = document.getElementById('showcaseSortDirectionBtn');
+        btn.textContent = showcaseSortAscending ? '↑' : '↓';
+        loadCodesForSelect(); // обновляем список без закрытия
     }
     
     function isVideo(url) {
@@ -3264,14 +3300,26 @@
                 codesArray.push({ code, filesCount: files.length, isInShowcase });
             });
             
-            codesArray.sort((a, b) => {
-                const numA = parseInt(a.code);
-                const numB = parseInt(b.code);
-                if (!isNaN(numA) && !isNaN(numB)) {
-                    return numA - numB;
-                }
-                return a.code.localeCompare(b.code);
-            });
+            // Сортировка с учётом направления
+            if (!showcaseSortAscending) {
+                codesArray.sort((a, b) => {
+                    const numA = parseInt(a.code);
+                    const numB = parseInt(b.code);
+                    if (!isNaN(numA) && !isNaN(numB)) {
+                        return numB - numA; // убывание
+                    }
+                    return b.code.localeCompare(a.code);
+                });
+            } else {
+                codesArray.sort((a, b) => {
+                    const numA = parseInt(a.code);
+                    const numB = parseInt(b.code);
+                    if (!isNaN(numA) && !isNaN(numB)) {
+                        return numA - numB; // возрастание
+                    }
+                    return a.code.localeCompare(b.code);
+                });
+            }
             
             select.innerHTML = '<option value="">Выберите код</option>';
             codesArray.forEach(item => {
