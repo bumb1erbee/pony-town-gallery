@@ -4,39 +4,238 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Pony Town Gallery</title>
+    
+    <!-- FAVICON -->
+    <link rel="icon" type="image/png" href="https://i.postimg.cc/qvp6cNBd/favicon.png">
+    
+    <!-- МЕТА-ОПИСАНИЕ ДЛЯ ПОИСКОВИКОВ -->
+    <meta name="description" content="Pony Town Gallery — база скинов для Pony Town. Получайте параметры скинов по коду, просматривайте витрину и находите нужные образы.">
+    
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <style>
+        /* ===== ГРАДИЕНТНЫЙ ФОН ===== */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(180deg, #f8f7f3 0%, #eeeae0 100%);
+            color: #585149;
+            padding: 20px;
+            cursor: default;
+            min-height: 100vh;
+            margin: 0;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* ===== ПАДАЮЩИЕ ЗВЁЗДОЧКИ ===== */
+        .falling-stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        
+        .falling-star {
+            position: absolute;
+            top: -50px;
+            font-size: 14px;
+            animation: fall linear infinite;
+            pointer-events: none;
+            will-change: transform;
+            backface-visibility: hidden;
+            transform: translateY(-30px);
+        }
+        
+        @keyframes fall {
+            0% {
+                transform: translateY(-30px) rotate(0deg) scale(0.8);
+                opacity: 0;
+            }
+            5% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(105vh) rotate(360deg) scale(1.2);
+                opacity: 0;
+            }
+        }
+        
+        /* ===== ВЗРЫВ ЗВЁЗДОЧЕК ПРИ КЛИКЕ ===== */
+        .click-burst {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9998;
+        }
+        
+        .burst-star {
+            position: absolute;
+            font-size: 18px;
+            animation: burstOut 0.8s ease-out forwards;
+            pointer-events: none;
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+        }
+        
+        @keyframes burstOut {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) scale(0.3) rotate(360deg);
+            }
+        }
+        
+        /* ===== ЗВЁЗДНЫЙ СЛЕД ЗА МЫШКОЙ (для ПК) ===== */
+        .star-trail {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            font-size: 18px;
+            color: #bfa07c;
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            animation: starFloat 1.0s ease-out forwards;
+            text-shadow: 0 0 10px rgba(191, 160, 124, 0.4), 0 0 30px rgba(191, 160, 124, 0.15);
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+        }
+        
+        @keyframes starFloat {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.3) rotate(180deg);
+            }
+        }
+        
+        /* ===== ОСНОВНЫЕ СТИЛИ ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
         
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: #f0ede5;
-            color: #585149;
-            padding: 20px;
-        }
-        
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* ===== КНОПКА СЛЕВА (вне контейнера) ===== */
+        .team-btn-wrapper {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+        }
+        
+        .team-btn {
+            background: #585149;
+            color: #f0ede5;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-decoration: none;
+            display: inline-block;
+            white-space: nowrap;
+            position: relative;
+            overflow: hidden;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .team-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.15);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+        
+        .team-btn:hover::after {
+            transform: scaleX(1);
+        }
+        
+        .team-btn:hover {
+            background: #6b6258;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 4px 15px rgba(88, 81, 73, 0.3);
+        }
+        
+        .team-btn:active {
+            transform: scale(0.95);
+        }
+        
+        @media (max-width: 600px) {
+            .team-btn-wrapper {
+                position: static;
+                text-align: center;
+                margin-bottom: 10px;
+            }
+            .team-btn {
+                padding: 8px 16px;
+                font-size: 14px;
+                width: auto;
+                transition: background 0.3s ease;
+            }
+            .team-btn:hover {
+                transform: none;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            }
+            .team-btn:active {
+                transform: none;
+            }
+            .team-btn::after {
+                display: none;
+            }
+        }
+        
+        /* ===== ЗАГОЛОВОК ===== */
+        .header-center {
+            text-align: center;
+            margin-bottom: 10px;
+            padding-top: 10px;
         }
         
         .gallery-title {
             color: #585149;
             font-weight: bold;
             font-size: 28px;
-            text-align: center;
-            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 600px) {
+            .header-center {
+                padding-top: 0;
+            }
+            .gallery-title {
+                font-size: 22px;
+            }
         }
         
         .telegram-link {
             text-align: center;
-            margin-top: 10px;
+            margin-top: 0;
             margin-bottom: 20px;
             font-size: 16px;
             color: #585149;
@@ -45,10 +244,72 @@
         .telegram-link a {
             color: #585149;
             text-decoration: none;
+            display: inline-block;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         
         .telegram-link a:hover {
-            text-decoration: underline;
+            transform: scale(1.1) rotate(-5deg);
+        }
+        
+        .telegram-link img {
+            vertical-align: middle;
+            width: 28px;
+            height: 28px;
+            margin-right: 8px;
+        }
+        
+        /* ===== СВЕЧЕНИЕ И АНИМАЦИЯ ПРИ НАВЕДЕНИИ ===== */
+        .search-section {
+            background: rgba(211, 193, 160, 0.85);
+            backdrop-filter: blur(4px);
+            border-radius: 20px;
+            padding: 30px 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            display: none;
+            border: 1px solid rgba(122, 113, 102, 0.08);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform: translateX(0);
+            box-shadow: 0 0 0px rgba(122, 113, 102, 0);
+        }
+        
+        .search-section.active-tab {
+            display: block;
+        }
+        
+        /* Анимация для десктопа */
+        @media (hover: hover) {
+            .search-section:hover {
+                transform: translateX(-6px);
+                box-shadow: 0 0 30px rgba(122, 113, 102, 0.35), 0 0 70px rgba(122, 113, 102, 0.2), 0 0 120px rgba(122, 113, 102, 0.1);
+                border-color: rgba(122, 113, 102, 0.2);
+            }
+            
+            .notification-banner:hover {
+                transform: translateX(-6px);
+                box-shadow: 0 0 30px rgba(122, 113, 102, 0.3), 0 0 70px rgba(122, 113, 102, 0.15), 0 0 120px rgba(122, 113, 102, 0.08);
+                border-color: rgba(122, 113, 102, 0.15);
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .search-section {
+                transition: none;
+                transform: none;
+            }
+            .search-section:hover {
+                transform: none;
+                box-shadow: none;
+            }
+            .notification-banner {
+                transition: none;
+                transform: none;
+            }
+            .notification-banner:hover {
+                transform: none;
+                box-shadow: none;
+            }
         }
         
         .notification-banner {
@@ -61,7 +322,10 @@
             font-size: 15px;
             display: none;
             position: relative;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform: translateX(0);
+            box-shadow: 0 0 0px rgba(122, 113, 102, 0);
+            border: 1px solid rgba(122, 113, 102, 0.08);
         }
         
         .notification-banner.show {
@@ -106,33 +370,65 @@
             cursor: pointer;
             font-size: 16px;
             color: #585149;
-            transition: 0.2s;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        .tab-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.2);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+        
+        .tab-btn:hover::after {
+            transform: scaleX(1);
+        }
+        
+        .tab-btn:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .tab-btn:active {
+            transform: scale(0.95);
         }
         
         .tab-btn.active {
             background: #585149;
             color: #f0ede5;
+            box-shadow: 0 4px 15px rgba(88, 81, 73, 0.3);
         }
         
-        .search-section {
-            background: #d3c1a0;
-            border-radius: 20px;
-            padding: 30px 20px;
-            text-align: center;
-            margin-bottom: 30px;
-            display: none;
+        .tab-btn.active::after {
+            transform: scaleX(0);
         }
         
-        .search-section.active-tab {
-            display: block;
-        }
-        
-        .gallery-section {
-            display: none;
-        }
-        
-        .gallery-section.active-tab {
-            display: block;
+        @media (max-width: 600px) {
+            .tab-btn {
+                padding: 8px 16px;
+                font-size: 14px;
+                transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+            }
+            .tab-btn::after {
+                display: none;
+            }
+            .tab-btn:hover {
+                transform: none;
+                box-shadow: none;
+            }
+            .tab-btn:active {
+                transform: none;
+            }
+            .tab-btn.active {
+                box-shadow: 0 2px 10px rgba(88, 81, 73, 0.3);
+            }
         }
         
         h1 {
@@ -152,17 +448,24 @@
         .search-box input {
             padding: 12px 16px;
             font-size: 16px;
-            border: 1px solid #c3a684;
+            border: 2px solid #c3a684;
             border-radius: 12px;
-            background: #f0ede5;
+            background: rgba(240, 237, 229, 0.9);
             outline: none;
             width: 100%;
             max-width: 260px;
             color: #585149;
+            transition: all 0.3s ease;
         }
         
         .search-box input:focus {
             border-color: #585149;
+            box-shadow: 0 0 0 3px rgba(88, 81, 73, 0.15);
+            transform: scale(1.01);
+        }
+        
+        .search-box input:hover {
+            border-color: #6b6258;
         }
         
         .search-box button {
@@ -173,12 +476,58 @@
             border-radius: 12px;
             cursor: pointer;
             font-size: 16px;
-            transition: 0.2s;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             white-space: nowrap;
+            position: relative;
+            overflow: hidden;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .search-box button::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.15);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+        
+        .search-box button:hover::after {
+            transform: scaleX(1);
         }
         
         .search-box button:hover {
             background: #6b6258;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 4px 15px rgba(88, 81, 73, 0.3);
+        }
+        
+        .search-box button:active {
+            transform: scale(0.95);
+        }
+        
+        @media (max-width: 600px) {
+            .search-box input {
+                transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            }
+            .search-box input:focus {
+                transform: none;
+            }
+            .search-box button {
+                transition: background 0.3s ease, box-shadow 0.3s ease;
+            }
+            .search-box button::after {
+                display: none;
+            }
+            .search-box button:hover {
+                transform: none;
+                box-shadow: 0 2px 10px rgba(88, 81, 73, 0.2);
+            }
+            .search-box button:active {
+                transform: none;
+            }
         }
         
         .admin-message-under-input {
@@ -196,18 +545,38 @@
         }
         
         .photo-card {
-            background: #fff;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(2px);
             border-radius: 16px;
             overflow: hidden;
             cursor: pointer;
-            transition: 0.2s;
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             position: relative;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
         
         .photo-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .photo-card:active {
+            transform: scale(0.97);
+        }
+        
+        @media (max-width: 600px) {
+            .photo-card {
+                transition: box-shadow 0.3s ease;
+            }
+            .photo-card:hover {
+                transform: none;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+            .photo-card:active {
+                transform: none;
+            }
         }
         
         .photo-card img {
@@ -216,6 +585,15 @@
             aspect-ratio: 1 / 1;
             object-fit: cover;
             display: block;
+        }
+        
+        .photo-card video {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            display: block;
+            background: #000;
         }
         
         .photo-number {
@@ -239,17 +617,37 @@
         }
         
         .showcase-card {
-            background: #fff;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(2px);
             border-radius: 16px;
             overflow: hidden;
-            transition: 0.2s;
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
         
         .showcase-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .showcase-card:active {
+            transform: scale(0.97);
+        }
+        
+        @media (max-width: 600px) {
+            .showcase-card {
+                transition: box-shadow 0.3s ease;
+            }
+            .showcase-card:hover {
+                transform: none;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+            .showcase-card:active {
+                transform: none;
+            }
         }
         
         .showcase-card img {
@@ -258,6 +656,15 @@
             aspect-ratio: 1 / 1;
             object-fit: cover;
             display: block;
+        }
+        
+        .showcase-card video {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            display: block;
+            background: #000;
         }
         
         .showcase-code-btn {
@@ -272,12 +679,52 @@
             cursor: pointer;
             font-size: 14px;
             font-weight: 500;
-            transition: 0.2s;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             text-align: center;
+            position: relative;
+            overflow: hidden;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .showcase-code-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.15);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+        
+        .showcase-code-btn:hover::after {
+            transform: scaleX(1);
         }
         
         .showcase-code-btn:hover {
             background: #6b6258;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 4px 12px rgba(88, 81, 73, 0.3);
+        }
+        
+        .showcase-code-btn:active {
+            transform: scale(0.95);
+        }
+        
+        @media (max-width: 600px) {
+            .showcase-code-btn {
+                transition: background 0.3s ease, box-shadow 0.3s ease;
+            }
+            .showcase-code-btn::after {
+                display: none;
+            }
+            .showcase-code-btn:hover {
+                transform: none;
+                box-shadow: 0 2px 10px rgba(88, 81, 73, 0.2);
+            }
+            .showcase-code-btn:active {
+                transform: none;
+            }
         }
         
         .showcase-code {
@@ -286,9 +733,10 @@
             color: #7a6e5f;
             text-align: center;
             border-top: 1px solid #e8e0d0;
-            background: #faf8f3;
+            background: rgba(250, 248, 243, 0.8);
         }
         
+        /* Стили для модального окна со стрелками */
         .modal {
             display: none;
             position: fixed;
@@ -329,6 +777,15 @@
             transition: transform 0.05s linear;
             transform-origin: center center;
             will-change: transform;
+            display: block;
+        }
+        
+        .modal #videoPlayer {
+            max-width: 95%;
+            max-height: 95%;
+            border-radius: 8px;
+            display: none;
+            background: #000;
         }
         
         .modal .close {
@@ -347,12 +804,28 @@
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            transition: 0.2s;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         
         .modal .close:hover {
             background: rgba(0,0,0,0.8);
-            transform: scale(1.1);
+            transform: rotate(90deg) scale(1.1);
+        }
+        
+        .modal .close:active {
+            transform: scale(0.85);
+        }
+        
+        @media (max-width: 600px) {
+            .modal .close {
+                transition: background 0.3s ease;
+            }
+            .modal .close:hover {
+                transform: none;
+            }
+            .modal .close:active {
+                transform: none;
+            }
         }
         
         .modal .counter {
@@ -386,6 +859,75 @@
             border-radius: 20px;
         }
         
+        /* Стрелки навигации */
+        .modal .nav-arrow {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(88, 81, 73, 0.6);
+            color: #f0ede5;
+            border: none;
+            font-size: 36px;
+            padding: 18px 14px;
+            cursor: pointer;
+            z-index: 1003;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        .modal .nav-arrow:hover {
+            background: rgba(88, 81, 73, 0.85);
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .modal .nav-arrow:active {
+            transform: translateY(-50%) scale(0.9);
+        }
+        
+        .modal .nav-arrow.left {
+            left: 16px;
+        }
+        
+        .modal .nav-arrow.right {
+            right: 16px;
+        }
+        
+        .modal .nav-arrow.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        @media (max-width: 600px) {
+            .modal .nav-arrow {
+                font-size: 24px;
+                padding: 14px 10px;
+                border-radius: 10px;
+                background: rgba(88, 81, 73, 0.5);
+                transition: background 0.3s ease;
+            }
+            .modal .nav-arrow:hover {
+                transform: none;
+                box-shadow: none;
+            }
+            .modal .nav-arrow:active {
+                transform: none;
+            }
+            .modal .nav-arrow.left {
+                left: 8px;
+            }
+            .modal .nav-arrow.right {
+                right: 8px;
+            }
+        }
+        
         @media (max-width: 600px) {
             body {
                 padding: 12px;
@@ -395,6 +937,10 @@
             }
             .telegram-link {
                 font-size: 14px;
+            }
+            .telegram-link img {
+                width: 22px;
+                height: 22px;
             }
             .notification-banner {
                 font-size: 13px;
@@ -510,7 +1056,8 @@
             width: 100%;
             max-width: 450px;
             height: 100vh;
-            background: #d3c1a0;
+            background: rgba(211, 193, 160, 0.97);
+            backdrop-filter: blur(8px);
             box-shadow: -2px 0 15px rgba(0,0,0,0.2);
             transition: right 0.3s ease;
             z-index: 1000;
@@ -549,6 +1096,29 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            touch-action: manipulation;
+        }
+        
+        .close-admin:hover, .close-worker:hover, .close-assistant:hover {
+            background: #6b6258;
+            transform: rotate(90deg) scale(1.1);
+        }
+        
+        .close-admin:active, .close-worker:active, .close-assistant:active {
+            transform: scale(0.85);
+        }
+        
+        @media (max-width: 600px) {
+            .close-admin, .close-worker, .close-assistant {
+                transition: background 0.3s ease;
+            }
+            .close-admin:hover, .close-worker:hover, .close-assistant:hover {
+                transform: none;
+            }
+            .close-admin:active, .close-worker:active, .close-assistant:active {
+                transform: none;
+            }
         }
         
         .admin-panel h3, .worker-panel h3, .assistant-panel h3 {
@@ -568,20 +1138,41 @@
             padding: 25px 15px;
             text-align: center;
             margin: 10px 0;
-            background: #f0ede5;
+            background: rgba(240, 237, 229, 0.8);
             cursor: pointer;
-            transition: 0.2s;
+            transition: all 0.3s ease;
             color: #585149;
             font-size: 14px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .upload-area:hover {
+            border-color: #585149;
+            background: rgba(232, 224, 208, 0.9);
+            transform: scale(1.01);
         }
         
         .upload-area.drag-over {
             background: #e8e0d0;
             border-color: #585149;
+            transform: scale(1.02);
+        }
+        
+        @media (max-width: 600px) {
+            .upload-area {
+                transition: border-color 0.3s ease, background 0.3s ease;
+            }
+            .upload-area:hover {
+                transform: none;
+            }
+            .upload-area.drag-over {
+                transform: none;
+            }
         }
         
         .photos-list {
-            background: #f0ede5;
+            background: rgba(240, 237, 229, 0.8);
             border-radius: 12px;
             padding: 10px;
             max-height: 200px;
@@ -594,12 +1185,27 @@
             align-items: center;
             gap: 10px;
             padding: 8px;
-            background: #fff;
+            background: rgba(255, 255, 255, 0.9);
             margin: 6px 0;
             border-radius: 10px;
+            transition: all 0.3s ease;
         }
         
-        .photo-item img {
+        .photo-item:hover {
+            transform: translateX(4px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        @media (max-width: 600px) {
+            .photo-item {
+                transition: box-shadow 0.3s ease;
+            }
+            .photo-item:hover {
+                transform: none;
+            }
+        }
+        
+        .photo-item img, .photo-item video {
             width: 40px;
             height: 40px;
             object-fit: cover;
@@ -620,10 +1226,29 @@
             cursor: pointer;
             font-size: 11px;
             color: #585149;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            touch-action: manipulation;
         }
         
         .photo-item button:hover {
             background: #b3926e;
+            transform: scale(1.1);
+        }
+        
+        .photo-item button:active {
+            transform: scale(0.9);
+        }
+        
+        @media (max-width: 600px) {
+            .photo-item button {
+                transition: background 0.3s ease;
+            }
+            .photo-item button:hover {
+                transform: none;
+            }
+            .photo-item button:active {
+                transform: none;
+            }
         }
         
         .code-input {
@@ -631,15 +1256,31 @@
             padding: 12px 15px;
             margin: 10px 0;
             border-radius: 12px;
-            border: 1px solid #c3a684;
-            background: #f0ede5;
+            border: 2px solid #c3a684;
+            background: rgba(240, 237, 229, 0.9);
             font-size: 14px;
             color: #585149;
             outline: none;
+            transition: all 0.3s ease;
         }
         
         .code-input:focus {
             border-color: #585149;
+            box-shadow: 0 0 0 3px rgba(88, 81, 73, 0.15);
+            transform: scale(1.01);
+        }
+        
+        .code-input:hover {
+            border-color: #6b6258;
+        }
+        
+        @media (max-width: 600px) {
+            .code-input {
+                transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            }
+            .code-input:focus {
+                transform: none;
+            }
         }
         
         .save-btn {
@@ -652,11 +1293,51 @@
             border-radius: 12px;
             cursor: pointer;
             font-size: 16px;
-            transition: 0.2s;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .save-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.1);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+        
+        .save-btn:hover::after {
+            transform: scaleX(1);
         }
         
         .save-btn:hover {
             background: #6b6258;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 4px 15px rgba(88, 81, 73, 0.3);
+        }
+        
+        .save-btn:active {
+            transform: scale(0.95);
+        }
+        
+        @media (max-width: 600px) {
+            .save-btn {
+                transition: background 0.3s ease, box-shadow 0.3s ease;
+            }
+            .save-btn::after {
+                display: none;
+            }
+            .save-btn:hover {
+                transform: none;
+                box-shadow: 0 2px 10px rgba(88, 81, 73, 0.2);
+            }
+            .save-btn:active {
+                transform: none;
+            }
         }
         
         .codes-list {
@@ -681,6 +1362,8 @@
         .sort-buttons {
             display: flex;
             gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
         }
         
         .sort-btn {
@@ -691,18 +1374,38 @@
             cursor: pointer;
             font-size: 12px;
             color: #585149;
-            transition: 0.2s;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            touch-action: manipulation;
+        }
+        
+        .sort-btn:hover {
+            background: #b3926e;
+            transform: translateY(-1px) scale(1.05);
+        }
+        
+        .sort-btn:active {
+            transform: scale(0.95);
         }
         
         .sort-btn.active {
             background: #585149;
             color: #f0ede5;
+            box-shadow: 0 2px 10px rgba(88, 81, 73, 0.3);
         }
         
-        .sort-btn:hover {
-            background: #b3926e;
+        @media (max-width: 600px) {
+            .sort-btn {
+                transition: background 0.3s ease, box-shadow 0.3s ease;
+            }
+            .sort-btn:hover {
+                transform: none;
+            }
+            .sort-btn:active {
+                transform: none;
+            }
         }
         
+        /* Кнопки направления сортировки */
         .sort-direction-btn {
             background: #c3a684;
             border: none;
@@ -711,13 +1414,31 @@
             cursor: pointer;
             font-size: 14px;
             color: #585149;
-            transition: 0.2s;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            touch-action: manipulation;
             min-width: 42px;
             text-align: center;
         }
         
         .sort-direction-btn:hover {
             background: #b3926e;
+            transform: translateY(-1px) scale(1.05);
+        }
+        
+        .sort-direction-btn:active {
+            transform: scale(0.95);
+        }
+        
+        @media (max-width: 600px) {
+            .sort-direction-btn {
+                transition: background 0.3s ease;
+            }
+            .sort-direction-btn:hover {
+                transform: none;
+            }
+            .sort-direction-btn:active {
+                transform: none;
+            }
         }
         
         .codes-container {
@@ -747,7 +1468,7 @@
         }
         
         .code-item {
-            background: #f0ede5;
+            background: rgba(240, 237, 229, 0.8);
             padding: 12px 12px;
             margin: 8px 0;
             border-radius: 12px;
@@ -756,13 +1477,24 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 8px;
-            transition: 0.2s;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             border: 1px solid transparent;
         }
         
         .code-item:hover {
-            background: #fff;
+            background: rgba(255, 255, 255, 0.95);
             border-color: #c3a684;
+            transform: translateX(4px) scale(1.01);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        
+        @media (max-width: 600px) {
+            .code-item {
+                transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            }
+            .code-item:hover {
+                transform: none;
+            }
         }
         
         .code-item .code-name {
@@ -787,20 +1519,52 @@
             cursor: pointer;
             font-size: 12px;
             color: #585149;
-            transition: 0.2s;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            touch-action: manipulation;
         }
         
         .code-actions button:hover {
             background: #b3926e;
-            transform: scale(1.02);
+            transform: scale(1.1);
+        }
+        
+        .code-actions button:active {
+            transform: scale(0.9);
+        }
+        
+        @media (max-width: 600px) {
+            .code-actions button {
+                transition: background 0.3s ease;
+            }
+            .code-actions button:hover {
+                transform: none;
+            }
+            .code-actions button:active {
+                transform: none;
+            }
         }
         
         .request-item {
-            background: #f0ede5;
+            background: rgba(240, 237, 229, 0.8);
             padding: 15px;
             margin: 12px 0;
             border-radius: 12px;
             border: 1px solid #c3a684;
+            transition: all 0.3s ease;
+        }
+        
+        .request-item:hover {
+            transform: translateX(4px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        
+        @media (max-width: 600px) {
+            .request-item {
+                transition: box-shadow 0.3s ease;
+            }
+            .request-item:hover {
+                transform: none;
+            }
         }
         
         .request-header {
@@ -842,13 +1606,32 @@
             object-fit: cover;
             border-radius: 10px;
             cursor: pointer;
-            transition: 0.2s;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             border: 2px solid transparent;
+            touch-action: manipulation;
         }
         
         .request-photo:hover {
-            transform: scale(1.05);
+            transform: scale(1.08);
             border-color: #c3a684;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        
+        .request-photo:active {
+            transform: scale(0.95);
+        }
+        
+        @media (max-width: 600px) {
+            .request-photo {
+                transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            }
+            .request-photo:hover {
+                transform: none;
+                box-shadow: none;
+            }
+            .request-photo:active {
+                transform: none;
+            }
         }
         
         .request-actions {
@@ -862,14 +1645,40 @@
             padding: 8px;
             font-size: 14px;
             border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: none;
+            cursor: pointer;
+            touch-action: manipulation;
         }
         
         .approve-btn {
             background: #27ae60;
+            color: white;
+        }
+        
+        .approve-btn:hover {
+            background: #2ecc71;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);
+        }
+        
+        .approve-btn:active {
+            transform: scale(0.95);
         }
         
         .reject-btn {
             background: #e74c3c;
+            color: white;
+        }
+        
+        .reject-btn:hover {
+            background: #ff6b6b;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+        }
+        
+        .reject-btn:active {
+            transform: scale(0.95);
         }
         
         .edit-code-btn {
@@ -879,6 +1688,23 @@
         
         .edit-code-btn:hover {
             background: #b3926e;
+            transform: translateY(-2px) scale(1.02);
+        }
+        
+        .edit-code-btn:active {
+            transform: scale(0.95);
+        }
+        
+        @media (max-width: 600px) {
+            .request-actions button {
+                transition: background 0.3s ease, box-shadow 0.3s ease;
+            }
+            .request-actions button:hover {
+                transform: none;
+            }
+            .request-actions button:active {
+                transform: none;
+            }
         }
         
         .delete-all-requests-btn {
@@ -891,10 +1717,31 @@
             border: none;
             cursor: pointer;
             font-size: 16px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            touch-action: manipulation;
         }
         
         .delete-all-requests-btn:hover {
             background: #c0392b;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+        }
+        
+        .delete-all-requests-btn:active {
+            transform: scale(0.95);
+        }
+        
+        @media (max-width: 600px) {
+            .delete-all-requests-btn {
+                transition: background 0.3s ease, box-shadow 0.3s ease;
+            }
+            .delete-all-requests-btn:hover {
+                transform: none;
+                box-shadow: 0 2px 10px rgba(231, 76, 60, 0.2);
+            }
+            .delete-all-requests-btn:active {
+                transform: none;
+            }
         }
         
         .storage-card {
@@ -931,7 +1778,7 @@
         }
         
         .instruction-box {
-            background: #f0ede5;
+            background: rgba(240, 237, 229, 0.9);
             border-radius: 12px;
             padding: 12px;
             margin-top: 15px;
@@ -954,6 +1801,29 @@
             margin-top: 8px;
             width: auto;
             display: inline-block;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            touch-action: manipulation;
+        }
+        
+        .refresh-storage:hover {
+            background: #b3926e;
+            transform: translateY(-1px) scale(1.05);
+        }
+        
+        .refresh-storage:active {
+            transform: scale(0.95);
+        }
+        
+        @media (max-width: 600px) {
+            .refresh-storage {
+                transition: background 0.3s ease;
+            }
+            .refresh-storage:hover {
+                transform: none;
+            }
+            .refresh-storage:active {
+                transform: none;
+            }
         }
         
         .message {
@@ -975,7 +1845,7 @@
         }
         
         .error-message {
-            background: #d3c1a0;
+            background: rgba(211, 193, 160, 0.85);
             border-radius: 16px;
             padding: 30px 20px;
             text-align: center;
@@ -1017,13 +1887,26 @@
         }
         
         .login-form {
-            background: #d3c1a0;
+            background: rgba(211, 193, 160, 0.97);
+            backdrop-filter: blur(8px);
             padding: 30px 35px 35px 35px;
             border-radius: 20px;
             width: 90%;
             max-width: 350px;
             text-align: center;
             position: relative;
+            animation: modalIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes modalIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.8) translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
         }
         
         .login-form h3 {
@@ -1036,9 +1919,16 @@
             padding: 12px;
             margin: 10px 0;
             border-radius: 12px;
-            border: 1px solid #c3a684;
-            background: #f0ede5;
+            border: 2px solid #c3a684;
+            background: rgba(240, 237, 229, 0.9);
             font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .login-form input:focus {
+            border-color: #585149;
+            box-shadow: 0 0 0 3px rgba(88, 81, 73, 0.15);
+            transform: scale(1.01);
         }
         
         .login-form button {
@@ -1050,13 +1940,39 @@
             padding: 14px;
             font-size: 16px;
             cursor: pointer;
-            transition: 0.2s;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: none;
         }
         
         .login-form button:hover {
             background: #6b6258;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 4px 15px rgba(88, 81, 73, 0.3);
         }
         
+        .login-form button:active {
+            transform: scale(0.95);
+        }
+        
+        @media (max-width: 600px) {
+            .login-form input {
+                transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            }
+            .login-form input:focus {
+                transform: none;
+            }
+            .login-form button {
+                transition: background 0.3s ease, box-shadow 0.3s ease;
+            }
+            .login-form button:hover {
+                transform: none;
+            }
+            .login-form button:active {
+                transform: none;
+            }
+        }
+        
+        /* КРЕСТИК — БЕЗ НОВЫХ АНИМАЦИЙ (только базовые) */
         .login-close {
             position: absolute;
             top: 12px;
@@ -1092,19 +2008,53 @@
         
         .danger-btn:hover {
             background: #c0392b;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+        }
+        
+        .danger-btn:active {
+            transform: scale(0.95);
+        }
+        
+        @media (max-width: 600px) {
+            .danger-btn {
+                transition: background 0.3s ease, box-shadow 0.3s ease;
+            }
+            .danger-btn:hover {
+                transform: none;
+                box-shadow: 0 2px 10px rgba(231, 76, 60, 0.2);
+            }
+            .danger-btn:active {
+                transform: none;
+            }
         }
         
         .showcase-item {
-            background: #f0ede5;
+            background: rgba(240, 237, 229, 0.8);
             padding: 12px;
             margin: 10px 0;
             border-radius: 12px;
             display: flex;
             gap: 12px;
             align-items: center;
+            transition: all 0.3s ease;
         }
         
-        .showcase-item img {
+        .showcase-item:hover {
+            transform: translateX(4px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        
+        @media (max-width: 600px) {
+            .showcase-item {
+                transition: box-shadow 0.3s ease;
+            }
+            .showcase-item:hover {
+                transform: none;
+            }
+        }
+        
+        .showcase-item img, .showcase-item video {
             width: 60px;
             height: 60px;
             object-fit: cover;
@@ -1133,10 +2083,33 @@
             border-radius: 20px;
             cursor: pointer;
             font-size: 12px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            touch-action: manipulation;
+        }
+        
+        .showcase-item-actions button:hover {
+            background: #b3926e;
+            transform: scale(1.1);
+        }
+        
+        .showcase-item-actions button:active {
+            transform: scale(0.9);
+        }
+        
+        @media (max-width: 600px) {
+            .showcase-item-actions button {
+                transition: background 0.3s ease;
+            }
+            .showcase-item-actions button:hover {
+                transform: none;
+            }
+            .showcase-item-actions button:active {
+                transform: none;
+            }
         }
         
         .add-showcase-area {
-            background: #f0ede5;
+            background: rgba(240, 237, 229, 0.8);
             border-radius: 12px;
             padding: 15px;
             margin: 15px 0;
@@ -1173,11 +2146,13 @@
         }
         
         .edit-code-modal .modal-box {
-            background: #d3c1a0;
+            background: rgba(211, 193, 160, 0.97);
+            backdrop-filter: blur(8px);
             border-radius: 20px;
             padding: 30px;
             max-width: 400px;
             width: 90%;
+            animation: modalIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         
         .edit-code-modal .modal-box h3 {
@@ -1189,10 +2164,17 @@
             width: 100%;
             padding: 12px;
             border-radius: 12px;
-            border: 1px solid #c3a684;
-            background: #f0ede5;
+            border: 2px solid #c3a684;
+            background: rgba(240, 237, 229, 0.9);
             font-size: 14px;
             margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .edit-code-modal .modal-box input:focus {
+            border-color: #585149;
+            box-shadow: 0 0 0 3px rgba(88, 81, 73, 0.15);
+            transform: scale(1.01);
         }
         
         .edit-code-modal .modal-box .modal-actions {
@@ -1207,6 +2189,8 @@
             border: none;
             cursor: pointer;
             font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            touch-action: manipulation;
         }
         
         .edit-code-modal .modal-box .modal-actions .save-edit-btn {
@@ -1216,6 +2200,12 @@
         
         .edit-code-modal .modal-box .modal-actions .save-edit-btn:hover {
             background: #6b6258;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 4px 15px rgba(88, 81, 73, 0.3);
+        }
+        
+        .edit-code-modal .modal-box .modal-actions .save-edit-btn:active {
+            transform: scale(0.95);
         }
         
         .edit-code-modal .modal-box .modal-actions .cancel-edit-btn {
@@ -1225,10 +2215,27 @@
         
         .edit-code-modal .modal-box .modal-actions .cancel-edit-btn:hover {
             background: #b3926e;
+            transform: translateY(-2px) scale(1.02);
+        }
+        
+        .edit-code-modal .modal-box .modal-actions .cancel-edit-btn:active {
+            transform: scale(0.95);
+        }
+        
+        @media (max-width: 600px) {
+            .edit-code-modal .modal-box .modal-actions button {
+                transition: background 0.3s ease, box-shadow 0.3s ease;
+            }
+            .edit-code-modal .modal-box .modal-actions button:hover {
+                transform: none;
+            }
+            .edit-code-modal .modal-box .modal-actions button:active {
+                transform: none;
+            }
         }
         
         .notification-control {
-            background: #f0ede5;
+            background: rgba(240, 237, 229, 0.8);
             border-radius: 12px;
             padding: 15px;
             margin-bottom: 20px;
@@ -1238,17 +2245,19 @@
             width: 100%;
             padding: 12px;
             border-radius: 12px;
-            border: 1px solid #c3a684;
+            border: 2px solid #c3a684;
             background: #fff;
             font-size: 14px;
             font-family: inherit;
             color: #585149;
             resize: vertical;
             min-height: 80px;
+            transition: all 0.3s ease;
         }
         
         .notification-control textarea:focus {
             border-color: #585149;
+            box-shadow: 0 0 0 3px rgba(88, 81, 73, 0.15);
             outline: none;
         }
         
@@ -1267,6 +2276,8 @@
             cursor: pointer;
             font-size: 14px;
             min-width: 100px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            touch-action: manipulation;
         }
         
         .notification-control .notification-actions .publish-btn {
@@ -1276,6 +2287,12 @@
         
         .notification-control .notification-actions .publish-btn:hover {
             background: #6b6258;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 4px 15px rgba(88, 81, 73, 0.3);
+        }
+        
+        .notification-control .notification-actions .publish-btn:active {
+            transform: scale(0.95);
         }
         
         .notification-control .notification-actions .remove-btn {
@@ -1285,6 +2302,24 @@
         
         .notification-control .notification-actions .remove-btn:hover {
             background: #c0392b;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+        }
+        
+        .notification-control .notification-actions .remove-btn:active {
+            transform: scale(0.95);
+        }
+        
+        @media (max-width: 600px) {
+            .notification-control .notification-actions button {
+                transition: background 0.3s ease, box-shadow 0.3s ease;
+            }
+            .notification-control .notification-actions button:hover {
+                transform: none;
+            }
+            .notification-control .notification-actions button:active {
+                transform: none;
+            }
         }
         
         .notification-status {
@@ -1294,18 +2329,107 @@
         }
         
         @media (max-width: 600px) {
-            .showcase-item img {
+            .showcase-item img, .showcase-item video {
                 width: 50px;
                 height: 50px;
+            }
+        }
+
+        /* ===== СТИЛИ ДЛЯ КАПЧИ ===== */
+        .captcha-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .captcha-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(240, 237, 229, 0.5);
+            padding: 8px 16px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(2px);
+            font-size: 14px;
+        }
+
+        .captcha-container:hover {
+            background: rgba(240, 237, 229, 0.7);
+        }
+
+        .captcha-container input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #585149;
+            flex-shrink: 0;
+            margin: 0;
+        }
+
+        .captcha-container label {
+            color: #585149;
+            cursor: pointer;
+            user-select: none;
+            font-size: 14px;
+        }
+
+        .captcha-container .captcha-status {
+            font-size: 14px;
+            min-width: 24px;
+            text-align: center;
+            color: #7a6e5f;
+        }
+
+        .captcha-container .captcha-status.success {
+            color: #27ae60;
+        }
+
+        .captcha-container .captcha-status.error {
+            color: #e74c3c;
+        }
+
+        @media (max-width: 600px) {
+            .captcha-container {
+                padding: 6px 12px;
+                gap: 8px;
+                font-size: 13px;
+            }
+            .captcha-container label {
+                font-size: 13px;
+            }
+            .captcha-container input[type="checkbox"] {
+                width: 16px;
+                height: 16px;
             }
         }
     </style>
 </head>
 <body>
 
+<!-- ===== КНОПКА СЛЕВА (вне контейнера, фиксированная) ===== -->
+<div class="team-btn-wrapper">
+    <a href="https://telegra.ph/Nabor-personala-v-Pony-Town-Gallery-05-16" target="_blank" class="team-btn">Стать частью нашей команды</a>
+</div>
+
+<!-- ===== ПАДАЮЩИЕ ЗВЁЗДОЧКИ ===== -->
+<div class="falling-stars-container" id="fallingStarsContainer"></div>
+
+<!-- ===== ЗВЁЗДНЫЙ СЛЕД ЗА МЫШКОЙ (контейнер) ===== -->
+<div id="starTrailContainer"></div>
+
 <div class="container">
-    <div class="gallery-title">Pony Town Gallery</div>
-    <div class="telegram-link">Следите за нами в тгк: <a href="https://t.me/pony_town_gallery" target="_blank">https://t.me/pony_town_gallery</a></div>
+    <!-- ===== ЗАГОЛОВОК ПО ЦЕНТРУ ===== -->
+    <div class="header-center">
+        <div class="gallery-title">Pony Town Gallery</div>
+    </div>
+    
+    <div class="telegram-link">
+        <a href="https://t.me/pony_town_gallery" target="_blank">
+            <img src="https://i.postimg.cc/HL6nMMQn/icons8-telegram-50.png" alt="Telegram" style="width:28px; height:28px; vertical-align:middle; margin-right:8px;">
+            Следите за нами в тгк
+        </a>
+    </div>
     
     <div id="notificationBanner" class="notification-banner">
         <span id="notificationText"></span>
@@ -1318,16 +2442,25 @@
     </div>
     
     <div id="searchTab" class="search-section active-tab">
-        <h1>Введите код для получения скринов</h1>
+        <h1>Введите код для получения параметров</h1>
+        
+        <!-- КАПЧА -->
+        <div class="captcha-wrapper">
+            <div class="captcha-container">
+                <input type="checkbox" id="searchCaptchaCheckbox">
+                <label for="searchCaptchaCheckbox">Я не робот</label>
+                <span class="captcha-status" id="searchCaptchaStatus"></span>
+            </div>
+        </div>
+        
         <div class="search-box">
             <input type="text" id="codeInput" placeholder="например: 8" onkeypress="if(event.key==='Enter') searchCode()">
-            <button onclick="searchCode()">Получить скрины</button>
+            <button onclick="searchCode()">Получить параметры</button>
         </div>
         <div id="adminNotification" class="admin-message-under-input"></div>
     </div>
     
     <div id="showcaseTab" class="gallery-section">
-        <h1 style="text-align:center; margin-bottom:20px;">Все доступные скины</h1>
         <div id="showcaseGrid" class="showcase-grid"></div>
     </div>
     
@@ -1348,9 +2481,12 @@
     <div class="modal-content">
         <div class="image-container" id="imageContainer">
             <img id="modalImage" src="">
+            <video id="videoPlayer" controls></video>
         </div>
     </div>
     <span class="close" onclick="closeModal()">&times;</span>
+    <button class="nav-arrow left" id="prevArrow" onclick="prevImage()">‹</button>
+    <button class="nav-arrow right" id="nextArrow" onclick="nextImage()">›</button>
     <div class="counter" id="imageCounter"></div>
     <div class="zoom-hint" id="zoomHint"></div>
 </div>
@@ -1369,17 +2505,17 @@
     </div>
     
     <div id="adminCodesTab">
-        <h3>1. Перетащите скрины сюда</h3>
+        <h3>1. Перетащите файлы с параметрами сюда</h3>
         <div id="adminUploadArea" class="upload-area">
-            Перетащите скрины или нажмите для выбора
+            Перетащите файлы или нажмите для выбора
         </div>
-        <input type="file" id="adminFileInput" multiple accept="image/*" style="display:none">
+        <input type="file" id="adminFileInput" multiple accept="image/*,video/*" style="display:none">
         
         <div id="adminPhotoList" class="photos-list"></div>
         
-        <h3>2. Введите код для этих скринов</h3>
+        <h3>2. Введите код для этих параметров</h3>
         <input type="text" id="adminCodeName" class="code-input" placeholder="например: 8">
-        <button class="save-btn" onclick="saveCodeAdmin()">Сохранить код и скрины</button>
+        <button class="save-btn" onclick="saveCodeAdmin()">Сохранить код и параметры</button>
         
         <div id="adminMessage"></div>
         
@@ -1427,14 +2563,11 @@
         
         <div class="add-showcase-area">
             <h4>Добавить скин в витрину</h4>
-            <div style="display: flex; gap: 8px; align-items: center;">
-                <select id="showcaseCodeSelect" class="code-input" style="flex:1;"></select>
-                <button class="sort-direction-btn" id="showcaseSortDirectionBtn" onclick="toggleShowcaseSortDirection()" title="Поменять направление сортировки">↑</button>
-            </div>
+            <select id="showcaseCodeSelect" class="code-input"></select>
             <div id="showcaseUploadArea" class="upload-area">
                 Перетащите картинку или нажмите для выбора
             </div>
-            <input type="file" id="showcaseFileInput" accept="image/*" style="display:none">
+            <input type="file" id="showcaseFileInput" accept="image/*,video/*" style="display:none">
             
             <div id="showcasePreview" style="display: none; margin-top: 12px; padding: 10px; background: #e8e0d0; border-radius: 12px; text-align: center;">
                 <div style="font-size: 12px; color: #7a6e5f; margin-bottom: 6px;">Предпросмотр:</div>
@@ -1469,15 +2602,15 @@
         <button class="close-worker" onclick="closeWorkerPanel()">✕</button>
     </div>
     
-    <h3>1. Перетащите скрины сюда</h3>
+    <h3>1. Перетащите файлы с параметрами сюда</h3>
     <div id="workerUploadArea" class="upload-area">
-        Перетащите скрины или нажмите для выбора
+        Перетащите файлы или нажмите для выбора
     </div>
-    <input type="file" id="workerFileInput" multiple accept="image/*" style="display:none">
+    <input type="file" id="workerFileInput" multiple accept="image/*,video/*" style="display:none">
     
     <div id="workerPhotoList" class="photos-list"></div>
     
-    <h3>2. Введите код для этих скринов</h3>
+    <h3>2. Введите код для этих параметров</h3>
     <input type="text" id="workerCodeName" class="code-input" placeholder="например: 8">
     <button class="save-btn" onclick="sendRequest('worker')">Отправить заявку на модерацию</button>
     
@@ -1490,15 +2623,15 @@
         <button class="close-assistant" onclick="closeAssistantPanel()">✕</button>
     </div>
     
-    <h3>1. Перетащите скрины сюда</h3>
+    <h3>1. Перетащите файлы с параметрами сюда</h3>
     <div id="assistantUploadArea" class="upload-area">
-        Перетащите скрины или нажмите для выбора
+        Перетащите файлы или нажмите для выбора
     </div>
-    <input type="file" id="assistantFileInput" multiple accept="image/*" style="display:none">
+    <input type="file" id="assistantFileInput" multiple accept="image/*,video/*" style="display:none">
     
     <div id="assistantPhotoList" class="photos-list"></div>
     
-    <h3>2. Введите код для этих скринов</h3>
+    <h3>2. Введите код для этих параметров</h3>
     <input type="text" id="assistantCodeName" class="code-input" placeholder="например: 8">
     <button class="save-btn" onclick="sendRequest('assistant')">Отправить заявку на модерацию</button>
     
@@ -1518,6 +2651,151 @@
 </div>
 
 <script>
+    // ===== ПАДАЮЩИЕ ЗВЁЗДОЧКИ =====
+    (function createFallingStars() {
+        const container = document.getElementById('fallingStarsContainer');
+        if (!container) return;
+        
+        const starSymbols = ['✦', '✧', '⋆', '✦', '✧'];
+        const starColor = '#c1a27f';
+        const isMobile = window.innerWidth <= 600;
+        // На телефоне 20 звёзд, на ПК — 40
+        const starCount = isMobile ? 20 : 40;
+        
+        for (let i = 0; i < starCount; i++) {
+            const star = document.createElement('div');
+            star.className = 'falling-star';
+            star.textContent = starSymbols[Math.floor(Math.random() * starSymbols.length)];
+            
+            const size = isMobile ? 10 + Math.random() * 14 : 10 + Math.random() * 18;
+            star.style.fontSize = size + 'px';
+            star.style.color = starColor;
+            star.style.left = Math.random() * 100 + '%';
+            const delay = isMobile ? Math.random() * 15 : Math.random() * 20;
+            star.style.animationDelay = delay + 's';
+            const duration = isMobile ? 8 + Math.random() * 12 : 10 + Math.random() * 16;
+            star.style.animationDuration = duration + 's';
+            star.style.opacity = 0.15 + Math.random() * 0.25;
+            
+            container.appendChild(star);
+        }
+    })();
+    
+    // ===== ВЗРЫВ ЗВЁЗДОЧЕК ПРИ КЛИКЕ (для ПК и телефона) =====
+    (function createClickBurst() {
+        const burstColors = ['#4e473f', '#70685d', '#dccfb6', '#c1a27f', '#ebe6db'];
+        const starSymbols = ['✦', '✧', '⋆', '✦', '✧'];
+        
+        function createBurst(x, y) {
+            const target = document.elementFromPoint(x, y);
+            if (target && (target.closest('.admin-panel') || target.closest('.worker-panel') || 
+                target.closest('.assistant-panel') || target.closest('.modal') ||
+                target.closest('.login-overlay') || target.closest('.edit-code-modal') ||
+                target.closest('.tab-btn') || target.closest('.save-btn') ||
+                target.closest('.search-box button') || target.closest('.showcase-code-btn') ||
+                target.closest('.nav-arrow') || target.closest('.close') ||
+                target.closest('.photo-card') || target.closest('.showcase-card') ||
+                target.closest('.login-close') || target.closest('.close-notification') ||
+                target.closest('.close-admin') || target.closest('.close-worker') ||
+                target.closest('.close-assistant'))) {
+                return;
+            }
+            
+            const burstContainer = document.createElement('div');
+            burstContainer.className = 'click-burst';
+            burstContainer.style.left = x + 'px';
+            burstContainer.style.top = y + 'px';
+            
+            const isMobile = window.innerWidth <= 600;
+            const starCount = isMobile ? 8 + Math.floor(Math.random() * 6) : 14 + Math.floor(Math.random() * 12);
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'burst-star';
+                star.textContent = starSymbols[Math.floor(Math.random() * starSymbols.length)];
+                
+                const angle = Math.random() * 2 * Math.PI;
+                const distance = isMobile ? 50 + Math.random() * 80 : 70 + Math.random() * 140;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+                
+                star.style.setProperty('--tx', tx + 'px');
+                star.style.setProperty('--ty', ty + 'px');
+                star.style.color = burstColors[Math.floor(Math.random() * burstColors.length)];
+                star.style.fontSize = (isMobile ? 14 : 16 + Math.random() * 20) + 'px';
+                star.style.animationDuration = (0.6 + Math.random() * 0.6) + 's';
+                
+                burstContainer.appendChild(star);
+            }
+            
+            document.body.appendChild(burstContainer);
+            
+            setTimeout(() => {
+                if (burstContainer.parentNode) {
+                    burstContainer.remove();
+                }
+            }, 1200);
+        }
+        
+        document.addEventListener('click', function(e) {
+            createBurst(e.clientX, e.clientY);
+        });
+        
+        document.addEventListener('touchstart', function(e) {
+            const touch = e.touches[0];
+            if (touch) {
+                setTimeout(() => {
+                    createBurst(touch.clientX, touch.clientY);
+                }, 50);
+            }
+        }, { passive: true });
+    })();
+    
+    // ===== ЗВЁЗДНЫЙ СЛЕД ЗА МЫШКОЙ (только для ПК) =====
+    (function createStarTrail() {
+        const starTrailContainer = document.getElementById('starTrailContainer');
+        if (!starTrailContainer) return;
+        
+        const trailStarSymbols = ['✦', '✧', '⋆', '✦', '✧', '✦'];
+        let lastStarTime = 0;
+        let isMobile = false;
+        
+        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+            isMobile = true;
+        }
+        
+        if (isMobile) {
+            starTrailContainer.style.display = 'none';
+            return;
+        }
+        
+        document.addEventListener('mousemove', function(e) {
+            const now = Date.now();
+            if (now - lastStarTime < 60) return;
+            lastStarTime = now;
+            
+            const star = document.createElement('div');
+            star.className = 'star-trail';
+            star.textContent = trailStarSymbols[Math.floor(Math.random() * trailStarSymbols.length)];
+            
+            const size = 16 + Math.random() * 14;
+            star.style.fontSize = size + 'px';
+            star.style.left = e.clientX + 'px';
+            star.style.top = e.clientY + 'px';
+            star.style.animationDuration = (0.8 + Math.random() * 0.6) + 's';
+            
+            starTrailContainer.appendChild(star);
+            
+            setTimeout(() => {
+                if (star.parentNode) {
+                    star.remove();
+                }
+            }, 1500);
+        });
+    })();
+    
+    // ===== ОСТАЛЬНОЙ КОД =====
+    
     const firebaseConfig = {
         apiKey: "AIzaSyDxe2Drt0F3A2-XB7W48dAlB7GO5pX5eTQ",
         authDomain: "pony-gallery.firebaseapp.com",
@@ -1552,10 +2830,7 @@
     
     let allCodesData = [];
     let codesSortType = 'date';
-    let sortAscending = true; // для основного списка кодов
-    
-    // для витрины
-    let showcaseSortAscending = true;
+    let sortAscending = true;
     
     let allShowcaseCodes = [];
     
@@ -1590,7 +2865,43 @@
     let isWorkerUser = false;
     let isAssistantUser = false;
     
-    // Функция для натуральной сортировки по номеру
+    // ===== ФУНКЦИИ ДЛЯ КАПЧИ =====
+    function checkSearchCaptcha() {
+        const checkbox = document.getElementById('searchCaptchaCheckbox');
+        const status = document.getElementById('searchCaptchaStatus');
+        if (!checkbox.checked) {
+            status.textContent = '✗';
+            status.className = 'captcha-status error';
+            return false;
+        }
+        status.textContent = '✓';
+        status.className = 'captcha-status success';
+        return true;
+    }
+
+    function resetSearchCaptcha() {
+        const checkbox = document.getElementById('searchCaptchaCheckbox');
+        const status = document.getElementById('searchCaptchaStatus');
+        checkbox.checked = false;
+        status.textContent = '';
+        status.className = 'captcha-status';
+    }
+    
+    // ===== ФУНКЦИИ СОРТИРОВКИ =====
+    function toggleSortDirection() {
+        sortAscending = !sortAscending;
+        const btn = document.getElementById('sortDirectionBtn');
+        btn.textContent = sortAscending ? '↑' : '↓';
+        renderCodesList();
+    }
+    
+    function isVideo(url) {
+        if (!url) return false;
+        const videoExtensions = ['mp4', 'webm', 'ogv', 'mov', 'avi', 'mkv'];
+        const ext = url.split('.').pop().toLowerCase();
+        return videoExtensions.includes(ext);
+    }
+    
     function naturalSort(a, b) {
         const numA = parseInt(a.code);
         const numB = parseInt(b.code);
@@ -1601,7 +2912,27 @@
         return a.code.localeCompare(b.code);
     }
     
-    // ===== Функции для уведомлений =====
+    function updateArrows() {
+        const prevArrow = document.getElementById('prevArrow');
+        const nextArrow = document.getElementById('nextArrow');
+        const total = currentPhotosList.length;
+        
+        if (prevArrow) {
+            if (currentPhotoIndex <= 0) {
+                prevArrow.classList.add('hidden');
+            } else {
+                prevArrow.classList.remove('hidden');
+            }
+        }
+        
+        if (nextArrow) {
+            if (currentPhotoIndex >= total - 1) {
+                nextArrow.classList.add('hidden');
+            } else {
+                nextArrow.classList.remove('hidden');
+            }
+        }
+    }
     
     async function loadNotification() {
         try {
@@ -1701,8 +3032,6 @@
         sessionStorage.setItem('notificationDismissedUntil', untilTime.toString());
     }
     
-    // ===== Конец функций уведомлений =====
-    
     function showLoading(element, originalText) {
         if (!element) return;
         element.dataset.originalText = originalText || element.innerHTML;
@@ -1712,7 +3041,7 @@
     
     function hideLoading(element) {
         if (!element) return;
-        element.innerHTML = element.dataset.originalText || 'Перетащите скрины или нажмите для выбора';
+        element.innerHTML = element.dataset.originalText || 'Перетащите файлы или нажмите для выбора';
         element.disabled = false;
         delete element.dataset.originalText;
     }
@@ -1720,6 +3049,7 @@
     function switchTab(tab) {
         const searchTab = document.getElementById('searchTab');
         const showcaseTab = document.getElementById('showcaseTab');
+        const showcaseGrid = document.getElementById('showcaseGrid');
         const tabs = document.querySelectorAll('.tab-btn');
         
         if (tab === 'search') {
@@ -1727,12 +3057,31 @@
             showcaseTab.classList.remove('active-tab');
             tabs[0].classList.add('active');
             tabs[1].classList.remove('active');
+            
             document.getElementById('gallery').innerHTML = '';
+            
+            if (showcaseGrid) {
+                showcaseGrid.innerHTML = '';
+            }
+            
+            const title = document.querySelector('.showcase-title');
+            if (title) {
+                title.remove();
+            }
         } else {
             searchTab.classList.remove('active-tab');
             showcaseTab.classList.add('active-tab');
             tabs[0].classList.remove('active');
             tabs[1].classList.add('active');
+            
+            if (showcaseGrid && !document.querySelector('.showcase-title')) {
+                const title = document.createElement('h1');
+                title.className = 'showcase-title';
+                title.style.cssText = 'text-align:center; margin-bottom:20px; font-size:24px; font-weight:500; color:#585149;';
+                title.textContent = 'Все доступные скины';
+                showcaseGrid.parentNode.insertBefore(title, showcaseGrid);
+            }
+            
             loadShowcase();
         }
     }
@@ -1756,22 +3105,6 @@
         }
         
         renderCodesList();
-    }
-    
-    // Переключатель направления для основного списка
-    function toggleSortDirection() {
-        sortAscending = !sortAscending;
-        const btn = document.getElementById('sortDirectionBtn');
-        btn.textContent = sortAscending ? '↑' : '↓';
-        renderCodesList();
-    }
-    
-    // Переключатель направления для витрины
-    function toggleShowcaseSortDirection() {
-        showcaseSortAscending = !showcaseSortAscending;
-        const btn = document.getElementById('showcaseSortDirectionBtn');
-        btn.textContent = showcaseSortAscending ? '↑' : '↓';
-        loadCodesForSelect();
     }
     
     function renderCodesList() {
@@ -1803,7 +3136,7 @@
             const count = item.photos.length;
             html += `
                 <div class="code-item">
-                    <span class="code-name">${escapeHtml(code)} (${count} скринов)</span>
+                    <span class="code-name">${escapeHtml(code)} (${count} файлов)</span>
                     <div class="code-actions">
                         <button onclick="editCode('${escapeHtml(code)}')">✏</button>
                         <button onclick="deleteCode('${escapeHtml(code)}')">🗑</button>
@@ -1829,16 +3162,27 @@
             let html = '';
             snapshot.forEach(doc => {
                 const item = doc.data();
-                const imageUrl = item.imageUrl || '';
+                const fileUrl = item.imageUrl || '';
                 const code = item.code;
+                const isVideoFile = isVideo(fileUrl);
                 
-                html += `
-                    <div class="showcase-card">
-                        <img src="${imageUrl}" alt="Скин ${code}" onclick="openShowcaseImageModal('${imageUrl}')" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\' viewBox=\'0 0 200 200\'%3E%3Crect width=\'200\' height=\'200\' fill=\'%23d3c1a0\'/%3E%3Ctext x=\'100\' y=\'110\' text-anchor=\'middle\' fill=\'%23585149\' font-size=\'14\'%3EНет фото%3C/text%3E%3C/svg%3E'">
-                        <button class="showcase-code-btn" onclick="fillCodeAndSwitch('${code.replace(/'/g, "\\'")}')">Получить параметры к этому скину</button>
-                        <div class="showcase-code">Код: ${escapeHtml(code)}</div>
-                    </div>
-                `;
+                if (isVideoFile) {
+                    html += `
+                        <div class="showcase-card" onclick="openShowcaseVideoModal('${fileUrl}')">
+                            <video src="${fileUrl}" muted preload="metadata" style="width:100%; aspect-ratio:1/1; object-fit:cover; background:#000;"></video>
+                            <button class="showcase-code-btn" onclick="event.stopPropagation(); fillCodeAndSwitch('${code.replace(/'/g, "\\'")}')">Получить параметры к этому скину</button>
+                            <div class="showcase-code">Код: ${escapeHtml(code)}</div>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="showcase-card">
+                            <img src="${fileUrl}" alt="Скин ${code}" onclick="openShowcaseImageModal('${fileUrl}')" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\' viewBox=\'0 0 200 200\'%3E%3Crect width=\'200\' height=\'200\' fill=\'%23d3c1a0\'/%3E%3Ctext x=\'100\' y=\'110\' text-anchor=\'middle\' fill=\'%23585149\' font-size=\'14\'%3EНет фото%3C/text%3E%3C/svg%3E'">
+                            <button class="showcase-code-btn" onclick="fillCodeAndSwitch('${code.replace(/'/g, "\\'")}')">Получить параметры к этому скину</button>
+                            <div class="showcase-code">Код: ${escapeHtml(code)}</div>
+                        </div>
+                    `;
+                }
             });
             container.innerHTML = html;
         } catch (error) {
@@ -1850,12 +3194,40 @@
     function openShowcaseImageModal(url) {
         const modal = document.getElementById('modal');
         const modalImg = document.getElementById('modalImage');
+        const videoPlayer = document.getElementById('videoPlayer');
+        
+        modalImg.style.display = 'block';
+        videoPlayer.style.display = 'none';
+        videoPlayer.pause();
+        
         modal.style.display = 'block';
         modalImg.src = url;
         currentPhotosList = [url];
         currentPhotoIndex = 0;
         resetZoom();
         updateCounter();
+        updateArrows();
+        document.body.style.overflow = 'hidden';
+        updateZoomHint();
+    }
+    
+    function openShowcaseVideoModal(url) {
+        const modal = document.getElementById('modal');
+        const modalImg = document.getElementById('modalImage');
+        const videoPlayer = document.getElementById('videoPlayer');
+        
+        modalImg.style.display = 'none';
+        videoPlayer.style.display = 'block';
+        videoPlayer.src = url;
+        videoPlayer.load();
+        videoPlayer.play();
+        
+        modal.style.display = 'block';
+        currentPhotosList = [url];
+        currentPhotoIndex = 0;
+        resetZoom();
+        updateCounter();
+        updateArrows();
         document.body.style.overflow = 'hidden';
         updateZoomHint();
     }
@@ -1887,12 +3259,11 @@
             const codesArray = [];
             snapshot.forEach(doc => {
                 const code = doc.id;
-                const photos = doc.data().photos || [];
+                const files = doc.data().photos || [];
                 const isInShowcase = allShowcaseCodes.includes(code);
-                codesArray.push({ code, photosCount: photos.length, isInShowcase });
+                codesArray.push({ code, filesCount: files.length, isInShowcase });
             });
             
-            // Сортировка по номеру (натуральная)
             codesArray.sort((a, b) => {
                 const numA = parseInt(a.code);
                 const numB = parseInt(b.code);
@@ -1902,15 +3273,10 @@
                 return a.code.localeCompare(b.code);
             });
             
-            // Применяем направление сортировки
-            if (!showcaseSortAscending) {
-                codesArray.reverse();
-            }
-            
             select.innerHTML = '<option value="">Выберите код</option>';
             codesArray.forEach(item => {
                 const checkmark = item.isInShowcase ? ' ✓' : '';
-                select.innerHTML += `<option value="${escapeHtml(item.code)}">${escapeHtml(item.code)} (${item.photosCount} скринов)${checkmark}</option>`;
+                select.innerHTML += `<option value="${escapeHtml(item.code)}">${escapeHtml(item.code)} (${item.filesCount} файлов)${checkmark}</option>`;
             });
         } catch (error) {
             console.error('Ошибка загрузки кодов для селекта:', error);
@@ -2059,9 +3425,14 @@
             snapshot.forEach(doc => {
                 const item = doc.data();
                 const showcaseId = doc.id;
+                const isVideoFile = isVideo(item.imageUrl);
+                
                 html += `
                     <div class="showcase-item">
-                        <img src="${item.imageUrl}" onerror="this.style.opacity='0.5'" loading="lazy">
+                        ${isVideoFile ? 
+                            `<video src="${item.imageUrl}" muted preload="metadata" style="width:60px; height:60px; object-fit:cover; border-radius:10px; background:#000;"></video>` :
+                            `<img src="${item.imageUrl}" onerror="this.style.opacity='0.5'" loading="lazy">`
+                        }
                         <div class="showcase-item-info">
                             <div class="showcase-item-code">Код: ${escapeHtml(item.code)}</div>
                             <div style="font-size: 11px; color: #7a6e5f;">Порядок: ${orderNumber}</div>
@@ -2244,9 +3615,25 @@
             updateTransform();
             setTimeout(() => {
                 currentPhotoIndex--;
-                document.getElementById('modalImage').src = currentPhotosList[currentPhotoIndex];
+                const url = currentPhotosList[currentPhotoIndex];
+                const modalImg = document.getElementById('modalImage');
+                const videoPlayer = document.getElementById('videoPlayer');
+                
+                if (isVideo(url)) {
+                    modalImg.style.display = 'none';
+                    videoPlayer.style.display = 'block';
+                    videoPlayer.src = url;
+                    videoPlayer.load();
+                    videoPlayer.play();
+                } else {
+                    modalImg.style.display = 'block';
+                    videoPlayer.style.display = 'none';
+                    videoPlayer.pause();
+                    modalImg.src = url;
+                }
                 resetZoom();
                 updateCounter();
+                updateArrows();
                 img.style.transition = '';
                 translateX = 0;
                 updateTransform();
@@ -2269,9 +3656,25 @@
             updateTransform();
             setTimeout(() => {
                 currentPhotoIndex++;
-                document.getElementById('modalImage').src = currentPhotosList[currentPhotoIndex];
+                const url = currentPhotosList[currentPhotoIndex];
+                const modalImg = document.getElementById('modalImage');
+                const videoPlayer = document.getElementById('videoPlayer');
+                
+                if (isVideo(url)) {
+                    modalImg.style.display = 'none';
+                    videoPlayer.style.display = 'block';
+                    videoPlayer.src = url;
+                    videoPlayer.load();
+                    videoPlayer.play();
+                } else {
+                    modalImg.style.display = 'block';
+                    videoPlayer.style.display = 'none';
+                    videoPlayer.pause();
+                    modalImg.src = url;
+                }
                 resetZoom();
                 updateCounter();
+                updateArrows();
                 img.style.transition = '';
                 translateX = 0;
                 updateTransform();
@@ -2849,10 +4252,14 @@
                 const requestId = doc.id;
                 const photos = request.photos || [];
                 const count = photos.length;
-                const countText = count === 1 ? '1 скрин' : `${count} скринов`;
+                const countText = count === 1 ? '1 файл' : `${count} файлов`;
                 const userEmail = request.userEmail || 'email не указан';
                 
                 const photosHtml = photos.map((url, idx) => {
+                    const isVideoFile = isVideo(url);
+                    if (isVideoFile) {
+                        return `<video src="${url}" class="request-photo" muted preload="metadata" onclick="openRequestVideoModal('${url}')" style="object-fit:cover; background:#000;" title="Видео ${idx + 1}"></video>`;
+                    }
                     return `<img src="${url}" class="request-photo" onclick="openRequestPhotoModal('${url}')" loading="lazy" onerror="this.style.opacity='0.3'" title="Фото ${idx + 1}">`;
                 }).join('');
                 
@@ -2883,8 +4290,36 @@
     function openRequestPhotoModal(url) {
         const modal = document.getElementById('modal');
         const modalImg = document.getElementById('modalImage');
+        const videoPlayer = document.getElementById('videoPlayer');
+        
+        modalImg.style.display = 'block';
+        videoPlayer.style.display = 'none';
+        videoPlayer.pause();
+        
         modal.style.display = 'block';
         modalImg.src = url;
+        currentPhotosList = [url];
+        currentPhotoIndex = 0;
+        updateArrows();
+        document.body.style.overflow = 'hidden';
+        resetZoom();
+    }
+    
+    function openRequestVideoModal(url) {
+        const modal = document.getElementById('modal');
+        const modalImg = document.getElementById('modalImage');
+        const videoPlayer = document.getElementById('videoPlayer');
+        
+        modalImg.style.display = 'none';
+        videoPlayer.style.display = 'block';
+        videoPlayer.src = url;
+        videoPlayer.load();
+        videoPlayer.play();
+        
+        modal.style.display = 'block';
+        currentPhotosList = [url];
+        currentPhotoIndex = 0;
+        updateArrows();
         document.body.style.overflow = 'hidden';
         resetZoom();
     }
@@ -2939,7 +4374,7 @@
             showMessage('adminMessage', 'Нет прав для удаления', 'error');
             return;
         }
-        if (confirm(`Удалить код "${code}" и все его скрины?`)) {
+        if (confirm(`Удалить код "${code}" и все его файлы?`)) {
             try {
                 await db.collection('codes').doc(code).delete();
                 showMessage('adminMessage', 'Код удалён', 'success');
@@ -2968,7 +4403,7 @@
                 adminUploadedUrls = doc.data().photos || [];
                 document.getElementById('adminCodeName').value = code;
                 renderAdminPhotoList();
-                showMessage('adminMessage', `Редактирование кода: ${code}. Добавьте новые скрины или удалите лишние.`, 'success');
+                showMessage('adminMessage', `Редактирование кода: ${code}. Добавьте новые файлы или удалите лишние.`, 'success');
             }
         } catch (error) {
             console.error('Ошибка загрузки кода для редактирования:', error);
@@ -2987,16 +4422,22 @@
     function renderAdminPhotoList() {
         const container = document.getElementById('adminPhotoList');
         if (adminUploadedUrls.length === 0) {
-            container.innerHTML = '<div style="text-align:center; padding:20px;">Нет скринов</div>';
+            container.innerHTML = '<div style="text-align:center; padding:20px;">Нет файлов</div>';
             return;
         }
         
         let html = '';
         for (let i = 0; i < adminUploadedUrls.length; i++) {
+            const url = adminUploadedUrls[i];
+            const isVideoFile = isVideo(url);
+            
             html += `
                 <div class="photo-item">
-                    <img src="${adminUploadedUrls[i]}">
-                    <span>Скрин ${i + 1}</span>
+                    ${isVideoFile ? 
+                        `<video src="${url}" muted preload="metadata" style="width:40px; height:40px; object-fit:cover; border-radius:8px; background:#000;"></video>` :
+                        `<img src="${url}">`
+                    }
+                    <span>Файл ${i + 1}</span>
                     <button onclick="removeAdminPhoto(${i})">✖</button>
                 </div>
             `;
@@ -3020,12 +4461,12 @@
             return;
         }
         if (adminUploadedUrls.length === 0) {
-            showMessage('adminMessage', 'Нет скринов! Сначала перетащите скрины', 'error');
+            showMessage('adminMessage', 'Нет файлов! Сначала перетащите файлы', 'error');
             return;
         }
         
         const saveButton = document.querySelector('#adminCodesTab .save-btn');
-        showLoading(saveButton, 'Сохранить код и скрины');
+        showLoading(saveButton, 'Сохранить код и файлы');
         
         try {
             const existingDoc = await db.collection('codes').doc(code).get();
@@ -3069,7 +4510,7 @@
     
     async function handleAdminFiles(files) {
         const fileArray = Array.from(files);
-        const imageFiles = fileArray.filter(f => f.type.startsWith('image/'));
+        const imageFiles = fileArray.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
         if (imageFiles.length === 0) return;
         
         const uploadArea = document.getElementById('adminUploadArea');
@@ -3086,7 +4527,7 @@
             uploadArea.innerHTML = originalText;
         }
         if (imageFiles.length > 0) {
-            showMessage('adminMessage', `Загружено ${adminUploadedUrls.length} скринов`, 'success');
+            showMessage('adminMessage', `Загружено ${adminUploadedUrls.length} файлов`, 'success');
         }
     }
     
@@ -3116,7 +4557,7 @@
     
     async function handleWorkerFiles(files) {
         const fileArray = Array.from(files);
-        const imageFiles = fileArray.filter(f => f.type.startsWith('image/'));
+        const imageFiles = fileArray.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
         if (imageFiles.length === 0) return;
         
         const uploadArea = document.getElementById('workerUploadArea');
@@ -3151,7 +4592,7 @@
         renderWorkerPhotoList();
         
         if (newUrls.length > 0) {
-            showMessage('workerMessage', `Загружено ${newUrls.length} скринов`, 'success');
+            showMessage('workerMessage', `Загружено ${newUrls.length} файлов`, 'success');
         } else if (imageFiles.length > 0) {
             showMessage('workerMessage', 'Не удалось загрузить файлы. Попробуйте ещё раз.', 'error');
         }
@@ -3184,16 +4625,22 @@
     function renderWorkerPhotoList() {
         const container = document.getElementById('workerPhotoList');
         if (workerUploadedUrls.length === 0) {
-            container.innerHTML = '<div style="text-align:center; padding:20px;">Нет скринов</div>';
+            container.innerHTML = '<div style="text-align:center; padding:20px;">Нет файлов</div>';
             return;
         }
         
         let html = '';
         for (let i = 0; i < workerUploadedUrls.length; i++) {
+            const url = workerUploadedUrls[i];
+            const isVideoFile = isVideo(url);
+            
             html += `
                 <div class="photo-item">
-                    <img src="${workerUploadedUrls[i]}">
-                    <span>Скрин ${i + 1}</span>
+                    ${isVideoFile ? 
+                        `<video src="${url}" muted preload="metadata" style="width:40px; height:40px; object-fit:cover; border-radius:8px; background:#000;"></video>` :
+                        `<img src="${url}">`
+                    }
+                    <span>Файл ${i + 1}</span>
                     <button onclick="removeWorkerPhoto(${i})">✖</button>
                 </div>
             `;
@@ -3208,7 +4655,7 @@
     
     async function handleAssistantFiles(files) {
         const fileArray = Array.from(files);
-        const imageFiles = fileArray.filter(f => f.type.startsWith('image/'));
+        const imageFiles = fileArray.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
         if (imageFiles.length === 0) return;
         
         const uploadArea = document.getElementById('assistantUploadArea');
@@ -3243,7 +4690,7 @@
         renderAssistantPhotoList();
         
         if (newUrls.length > 0) {
-            showMessage('assistantMessage', `Загружено ${newUrls.length} скринов`, 'success');
+            showMessage('assistantMessage', `Загружено ${newUrls.length} файлов`, 'success');
         } else if (imageFiles.length > 0) {
             showMessage('assistantMessage', 'Не удалось загрузить файлы. Попробуйте ещё раз.', 'error');
         }
@@ -3276,16 +4723,22 @@
     function renderAssistantPhotoList() {
         const container = document.getElementById('assistantPhotoList');
         if (assistantUploadedUrls.length === 0) {
-            container.innerHTML = '<div style="text-align:center; padding:20px;">Нет скринов</div>';
+            container.innerHTML = '<div style="text-align:center; padding:20px;">Нет файлов</div>';
             return;
         }
         
         let html = '';
         for (let i = 0; i < assistantUploadedUrls.length; i++) {
+            const url = assistantUploadedUrls[i];
+            const isVideoFile = isVideo(url);
+            
             html += `
                 <div class="photo-item">
-                    <img src="${assistantUploadedUrls[i]}">
-                    <span>Скрин ${i + 1}</span>
+                    ${isVideoFile ? 
+                        `<video src="${url}" muted preload="metadata" style="width:40px; height:40px; object-fit:cover; border-radius:8px; background:#000;"></video>` :
+                        `<img src="${url}">`
+                    }
+                    <span>Файл ${i + 1}</span>
                     <button onclick="removeAssistantPhoto(${i})">✖</button>
                 </div>
             `;
@@ -3330,7 +4783,7 @@
             return;
         }
         if (uploadedUrls.length === 0) {
-            showMessage(messageContainerId, 'Нет скринов! Сначала перетащите скрины', 'error');
+            showMessage(messageContainerId, 'Нет файлов! Сначала перетащите файлы', 'error');
             return;
         }
         
@@ -3432,6 +4885,10 @@
     }
     
     async function searchCode() {
+        if (!checkSearchCaptcha()) {
+            return;
+        }
+        
         const code = document.getElementById('codeInput').value.trim();
         const gallery = document.getElementById('gallery');
         const adminNotification = document.getElementById('adminNotification');
@@ -3441,6 +4898,7 @@
             adminNotification.innerHTML = '';
             gallery.innerHTML = '';
             document.getElementById('codeInput').value = '';
+            resetSearchCaptcha();
             return;
         }
         
@@ -3453,22 +4911,57 @@
                 currentPhotosList = [...photos];
                 let html = '';
                 for (let i = 0; i < photos.length; i++) {
-                    html += `
-                        <div class="photo-card" onclick="openModal('${photos[i]}', ${i})">
-                            <div class="photo-number">${i + 1}</div>
-                            <img src="${photos[i]}" alt="Скрин ${i + 1}">
-                        </div>
-                    `;
+                    const url = photos[i];
+                    const isVideoFile = isVideo(url);
+                    const numberLabel = isVideoFile ? `🎬 ${i + 1}` : `${i + 1}`;
+                    
+                    if (isVideoFile) {
+                        html += `
+                            <div class="photo-card" onclick="openVideoModal('${url}', ${i})">
+                                <div class="photo-number">${numberLabel}</div>
+                                <video src="${url}" muted preload="metadata" style="width:100%; aspect-ratio:1/1; object-fit:cover; background:#000;"></video>
+                            </div>
+                        `;
+                    } else {
+                        html += `
+                            <div class="photo-card" onclick="openModal('${url}', ${i})">
+                                <div class="photo-number">${numberLabel}</div>
+                                <img src="${url}" alt="Параметры ${i + 1}">
+                            </div>
+                        `;
+                    }
                 }
                 gallery.innerHTML = html;
+                resetSearchCaptcha();
             } else {
                 currentPhotosList = [];
                 gallery.innerHTML = `<div class="error-message">Код "${code}" не найден</div>`;
+                resetSearchCaptcha();
             }
         } catch (error) {
             console.error('Ошибка поиска:', error);
             gallery.innerHTML = `<div class="error-message">Ошибка подключения к базе данных</div>`;
+            resetSearchCaptcha();
         }
+    }
+    
+    function openVideoModal(src, index) {
+        const modal = document.getElementById('modal');
+        const modalImg = document.getElementById('modalImage');
+        const videoPlayer = document.getElementById('videoPlayer');
+        
+        modalImg.style.display = 'none';
+        videoPlayer.style.display = 'block';
+        videoPlayer.src = src;
+        videoPlayer.load();
+        videoPlayer.play();
+        
+        currentPhotoIndex = index;
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        updateCounter();
+        updateArrows();
+        updateZoomHint();
     }
     
     function openAdminPanel() {
@@ -3545,34 +5038,74 @@
         if (counter) {
             counter.textContent = `${currentPhotoIndex + 1} / ${currentPhotosList.length}`;
         }
+        updateArrows();
     }
     
     function nextImage() {
         if (currentPhotoIndex + 1 < currentPhotosList.length) {
             currentPhotoIndex++;
-            document.getElementById('modalImage').src = currentPhotosList[currentPhotoIndex];
+            const url = currentPhotosList[currentPhotoIndex];
+            const modalImg = document.getElementById('modalImage');
+            const videoPlayer = document.getElementById('videoPlayer');
+            
+            if (isVideo(url)) {
+                modalImg.style.display = 'none';
+                videoPlayer.style.display = 'block';
+                videoPlayer.src = url;
+                videoPlayer.load();
+                videoPlayer.play();
+            } else {
+                modalImg.style.display = 'block';
+                videoPlayer.style.display = 'none';
+                videoPlayer.pause();
+                modalImg.src = url;
+            }
             resetZoom();
             updateCounter();
+            updateArrows();
         }
     }
     
     function prevImage() {
         if (currentPhotoIndex - 1 >= 0) {
             currentPhotoIndex--;
-            document.getElementById('modalImage').src = currentPhotosList[currentPhotoIndex];
+            const url = currentPhotosList[currentPhotoIndex];
+            const modalImg = document.getElementById('modalImage');
+            const videoPlayer = document.getElementById('videoPlayer');
+            
+            if (isVideo(url)) {
+                modalImg.style.display = 'none';
+                videoPlayer.style.display = 'block';
+                videoPlayer.src = url;
+                videoPlayer.load();
+                videoPlayer.play();
+            } else {
+                modalImg.style.display = 'block';
+                videoPlayer.style.display = 'none';
+                videoPlayer.pause();
+                modalImg.src = url;
+            }
             resetZoom();
             updateCounter();
+            updateArrows();
         }
     }
     
     function openModal(src, index) {
         const modal = document.getElementById('modal');
         const modalImg = document.getElementById('modalImage');
+        const videoPlayer = document.getElementById('videoPlayer');
+        
+        modalImg.style.display = 'block';
+        videoPlayer.style.display = 'none';
+        videoPlayer.pause();
+        
         currentPhotoIndex = index;
         modal.style.display = 'block';
         modalImg.src = src;
         resetZoom();
         updateCounter();
+        updateArrows();
         document.body.style.overflow = 'hidden';
         updateZoomHint();
     }
@@ -3583,6 +5116,13 @@
         resetZoom();
         isSwiping = false;
         isAnimating = false;
+        
+        const videoPlayer = document.getElementById('videoPlayer');
+        if (videoPlayer) {
+            videoPlayer.pause();
+            videoPlayer.style.display = 'none';
+        }
+        document.getElementById('modalImage').style.display = 'block';
     }
     
     document.addEventListener('DOMContentLoaded', function() {
