@@ -2948,14 +2948,12 @@
     // === ФУНКЦИЯ СОРТИРОВКИ ПО НОМЕРУ В НАЗВАНИИ ===
     function sortUrlsByNumber(urls) {
         return urls.slice().sort((a, b) => {
-            // Извлекаем имя файла из URL
             const getName = (url) => {
                 const parts = url.split('/');
                 return parts[parts.length - 1] || '';
             };
             const nameA = getName(a);
             const nameB = getName(b);
-            // Пробуем извлечь число из начала имени
             const numA = parseInt(nameA);
             const numB = parseInt(nameB);
             if (!isNaN(numA) && !isNaN(numB)) {
@@ -4157,7 +4155,7 @@
         }
     }
     
-    // === ФУНКЦИЯ ЗАГРУЗКИ ФАЙЛОВ С СОРТИРОВКОЙ ===
+    // === ФУНКЦИЯ ЗАГРУЗКИ ФАЙЛОВ (ПОСЛЕДОВАТЕЛЬНАЯ) ===
     async function uploadFilesToGitHub(files, urlsArray, photoListId, messageId, uploadAreaId) {
         const fileArray = Array.from(files);
         const imageFiles = fileArray.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
@@ -4172,37 +4170,47 @@
         uploadArea.innerHTML = `Загрузка ${imageFiles.length} файлов... <span class="loading"></span>`;
         
         let successCount = 0;
-        const uploadPromises = imageFiles.map(async (file) => {
-            const formData = new FormData();
-            formData.append('file', file);
+        let errorCount = 0;
+        const newUrls = [];
+        
+        // === ПОСЛЕДОВАТЕЛЬНАЯ ЗАГРУЗКА (один за другим) ===
+        for (let i = 0; i < imageFiles.length; i++) {
+            const file = imageFiles[i];
+            uploadArea.innerHTML = `Загрузка ${i + 1}/${imageFiles.length}: ${file.name.substring(0, 30)}... <span class="loading"></span>`;
             
             try {
+                const formData = new FormData();
+                formData.append('file', file);
+                
                 const response = await fetch(WORKER_URL, {
                     method: 'POST',
                     body: formData
                 });
+                
                 const data = await response.json();
                 if (data.url) {
+                    newUrls.push(data.url);
                     successCount++;
-                    return data.url;
+                } else {
+                    errorCount++;
+                    console.error('Ошибка загрузки файла:', file.name, data);
                 }
-                return null;
             } catch (error) {
+                errorCount++;
                 console.error('Ошибка загрузки файла:', file.name, error);
-                return null;
             }
-        });
+        }
         
-        const urls = await Promise.all(uploadPromises);
-        const newUrls = urls.filter(url => url !== null);
         urlsArray.push(...newUrls);
         
         uploadArea.innerHTML = originalText;
         renderPhotoList(photoListId, urlsArray);
         
-        if (newUrls.length > 0) {
-            showMessage(messageId, `Загружено ${newUrls.length} файлов (всего ${urlsArray.length})`, 'success');
-        } else if (imageFiles.length > 0) {
+        if (successCount > 0 && errorCount === 0) {
+            showMessage(messageId, `Загружено ${successCount} файлов`, 'success');
+        } else if (successCount > 0 && errorCount > 0) {
+            showMessage(messageId, `Загружено ${successCount} файлов, ошибок: ${errorCount}`, 'error');
+        } else {
             showMessage(messageId, 'Не удалось загрузить файлы. Попробуйте ещё раз.', 'error');
         }
     }
@@ -4669,6 +4677,7 @@
         }
     }
     
+    // === ОБРАБОТЧИКИ ДЛЯ ЗАГРУЗКИ ФАЙЛОВ ===
     async function handleAdminFiles(files) {
         const uploadArea = document.getElementById('adminUploadArea');
         const originalText = uploadArea.innerHTML;
