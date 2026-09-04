@@ -4182,13 +4182,16 @@
         // Показываем загрузку
         uploadArea.innerHTML = `Загрузка ${imageFiles.length} файлов... <span class="loading"></span>`;
         uploadArea.style.opacity = '0.7';
+        uploadArea.style.pointerEvents = 'none';
         
         let successCount = 0;
         let errorCount = 0;
         const newUrls = [];
         
+        // === ПОСЛЕДОВАТЕЛЬНАЯ ЗАГРУЗКА ===
         for (let i = 0; i < imageFiles.length; i++) {
             const file = imageFiles[i];
+            // Обновляем прогресс
             uploadArea.innerHTML = `Загрузка ${i + 1}/${imageFiles.length}: ${file.name.substring(0, 30)}... <span class="loading"></span>`;
             
             try {
@@ -4212,15 +4215,25 @@
                 errorCount++;
                 console.error('Ошибка загрузки файла:', file.name, error);
             }
+            
+            // Небольшая задержка между файлами, чтобы не перегружать воркер
+            if (i < imageFiles.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, 300));
+            }
         }
         
+        // === ВСЕ ФАЙЛЫ ЗАГРУЖЕНЫ ===
         urlsArray.push(...newUrls);
         
-        // ВОССТАНАВЛИВАЕМ ОРИГИНАЛЬНЫЙ ТЕКСТ
+        // Восстанавливаем интерфейс
         uploadArea.innerHTML = originalText;
         uploadArea.style.opacity = '1';
+        uploadArea.style.pointerEvents = 'auto';
+        
+        // Обновляем список фото
         renderPhotoList(photoListId, urlsArray);
         
+        // Показываем сообщение
         if (successCount > 0 && errorCount === 0) {
             showMessage(messageId, `✅ Загружено ${successCount} файлов!`, 'success');
         } else if (successCount > 0 && errorCount > 0) {
