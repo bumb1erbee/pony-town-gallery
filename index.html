@@ -1266,6 +1266,7 @@
             flex: 1;
             font-size: 12px;
             color: #585149;
+            word-break: break-word;
         }
         
         .photo-item button {
@@ -1278,6 +1279,7 @@
             color: #585149;
             transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             touch-action: manipulation;
+            flex-shrink: 0;
         }
         
         .photo-item button:hover {
@@ -2994,16 +2996,33 @@
     
     // ===== ФУНКЦИИ СОРТИРОВКИ ФАЙЛОВ ПО НОМЕРУ =====
     function extractNumberFromFilename(url) {
-        const parts = url.split('/');
-        let filename = parts[parts.length - 1];
-        filename = filename.split('?')[0];
+        let filename = url;
+        if (url.includes('/')) {
+            const parts = url.split('/');
+            filename = parts[parts.length - 1];
+        }
+        if (filename.includes('?')) {
+            filename = filename.split('?')[0];
+        }
         const match = filename.match(/(\d+)/);
         if (match) {
             return parseInt(match[0]);
         }
         return Infinity;
     }
-    
+
+    function getFileDisplayName(url) {
+        let filename = url;
+        if (url.includes('/')) {
+            const parts = url.split('/');
+            filename = parts[parts.length - 1];
+        }
+        if (filename.includes('?')) {
+            filename = filename.split('?')[0];
+        }
+        return filename.replace(/\.[^/.]+$/, '');
+    }
+
     function sortPhotosByNumber(urls) {
         return urls.sort((a, b) => {
             const numA = extractNumberFromFilename(a);
@@ -3011,7 +3030,7 @@
             return numA - numB;
         });
     }
-    
+
     function sortAdminPhotos() {
         if (adminUploadedUrls.length === 0) {
             showMessage('adminMessage', 'Нет файлов для сортировки', 'error');
@@ -3021,7 +3040,7 @@
         renderAdminPhotoList();
         showMessage('adminMessage', 'Файлы отсортированы по номеру!', 'success');
     }
-    
+
     function sortWorkerPhotos() {
         if (workerUploadedUrls.length === 0) {
             showMessage('workerMessage', 'Нет файлов для сортировки', 'error');
@@ -3031,7 +3050,7 @@
         renderWorkerPhotoList();
         showMessage('workerMessage', 'Файлы отсортированы по номеру!', 'success');
     }
-    
+
     function sortAssistantPhotos() {
         if (assistantUploadedUrls.length === 0) {
             showMessage('assistantMessage', 'Нет файлов для сортировки', 'error');
@@ -4618,6 +4637,9 @@
         for (let i = 0; i < adminUploadedUrls.length; i++) {
             const url = adminUploadedUrls[i];
             const isVideoFile = isVideo(url);
+            const displayName = getFileDisplayName(url);
+            const displayNumber = i + 1;
+            
             const thumbnail = isVideoFile ? 
                 `<video src="${url}" muted preload="metadata" style="width:40px; height:40px; object-fit:cover; border-radius:8px; background:#000;" onclick="event.stopPropagation(); openPhotoModal('${url}')"></video>` :
                 `<img src="${url}" onclick="event.stopPropagation(); openPhotoModal('${url}')" loading="lazy" onerror="this.style.opacity='0.3'" style="cursor:pointer;">`;
@@ -4625,7 +4647,7 @@
             html += `
                 <div class="photo-item" onclick="openPhotoModal('${url}')">
                     ${thumbnail}
-                    <span>${i + 1}</span>
+                    <span>${displayNumber} — ${escapeHtml(displayName)}</span>
                     <button onclick="event.stopPropagation(); removeAdminPhoto(${i})">✖</button>
                 </div>
             `;
@@ -4821,6 +4843,9 @@
         for (let i = 0; i < workerUploadedUrls.length; i++) {
             const url = workerUploadedUrls[i];
             const isVideoFile = isVideo(url);
+            const displayName = getFileDisplayName(url);
+            const displayNumber = i + 1;
+            
             const thumbnail = isVideoFile ? 
                 `<video src="${url}" muted preload="metadata" style="width:40px; height:40px; object-fit:cover; border-radius:8px; background:#000;" onclick="event.stopPropagation(); openPhotoModal('${url}')"></video>` :
                 `<img src="${url}" onclick="event.stopPropagation(); openPhotoModal('${url}')" loading="lazy" onerror="this.style.opacity='0.3'" style="cursor:pointer;">`;
@@ -4828,7 +4853,7 @@
             html += `
                 <div class="photo-item" onclick="openPhotoModal('${url}')">
                     ${thumbnail}
-                    <span>${i + 1}</span>
+                    <span>${displayNumber} — ${escapeHtml(displayName)}</span>
                     <button onclick="event.stopPropagation(); removeWorkerPhoto(${i})">✖</button>
                 </div>
             `;
@@ -4919,6 +4944,9 @@
         for (let i = 0; i < assistantUploadedUrls.length; i++) {
             const url = assistantUploadedUrls[i];
             const isVideoFile = isVideo(url);
+            const displayName = getFileDisplayName(url);
+            const displayNumber = i + 1;
+            
             const thumbnail = isVideoFile ? 
                 `<video src="${url}" muted preload="metadata" style="width:40px; height:40px; object-fit:cover; border-radius:8px; background:#000;" onclick="event.stopPropagation(); openPhotoModal('${url}')"></video>` :
                 `<img src="${url}" onclick="event.stopPropagation(); openPhotoModal('${url}')" loading="lazy" onerror="this.style.opacity='0.3'" style="cursor:pointer;">`;
@@ -4926,7 +4954,7 @@
             html += `
                 <div class="photo-item" onclick="openPhotoModal('${url}')">
                     ${thumbnail}
-                    <span>${i + 1}</span>
+                    <span>${displayNumber} — ${escapeHtml(displayName)}</span>
                     <button onclick="event.stopPropagation(); removeAssistantPhoto(${i})">✖</button>
                 </div>
             `;
