@@ -2964,21 +2964,33 @@
     }
     
     function sortAdminPhotosByNumber() {
+        if (adminUploadedUrls.length === 0) {
+            showMessage('adminMessage', 'Нет файлов для сортировки', 'error');
+            return;
+        }
         adminUploadedUrls = sortUrlsByNumber(adminUploadedUrls);
         renderPhotoList('adminPhotoList', adminUploadedUrls);
-        showMessage('adminMessage', 'Файлы отсортированы по номеру', 'success');
+        showMessage('adminMessage', '✅ Файлы отсортированы по номеру!', 'success');
     }
     
     function sortWorkerPhotosByNumber() {
+        if (workerUploadedUrls.length === 0) {
+            showMessage('workerMessage', 'Нет файлов для сортировки', 'error');
+            return;
+        }
         workerUploadedUrls = sortUrlsByNumber(workerUploadedUrls);
         renderPhotoList('workerPhotoList', workerUploadedUrls);
-        showMessage('workerMessage', 'Файлы отсортированы по номеру', 'success');
+        showMessage('workerMessage', '✅ Файлы отсортированы по номеру!', 'success');
     }
     
     function sortAssistantPhotosByNumber() {
+        if (assistantUploadedUrls.length === 0) {
+            showMessage('assistantMessage', 'Нет файлов для сортировки', 'error');
+            return;
+        }
         assistantUploadedUrls = sortUrlsByNumber(assistantUploadedUrls);
         renderPhotoList('assistantPhotoList', assistantUploadedUrls);
-        showMessage('assistantMessage', 'Файлы отсортированы по номеру', 'success');
+        showMessage('assistantMessage', '✅ Файлы отсортированы по номеру!', 'success');
     }
     
     function isVideo(url) {
@@ -4167,13 +4179,14 @@
         const uploadArea = document.getElementById(uploadAreaId);
         const originalText = uploadArea.innerHTML;
         
+        // Показываем загрузку
         uploadArea.innerHTML = `Загрузка ${imageFiles.length} файлов... <span class="loading"></span>`;
+        uploadArea.style.opacity = '0.7';
         
         let successCount = 0;
         let errorCount = 0;
         const newUrls = [];
         
-        // === ПОСЛЕДОВАТЕЛЬНАЯ ЗАГРУЗКА (один за другим) ===
         for (let i = 0; i < imageFiles.length; i++) {
             const file = imageFiles[i];
             uploadArea.innerHTML = `Загрузка ${i + 1}/${imageFiles.length}: ${file.name.substring(0, 30)}... <span class="loading"></span>`;
@@ -4203,15 +4216,17 @@
         
         urlsArray.push(...newUrls);
         
+        // ВОССТАНАВЛИВАЕМ ОРИГИНАЛЬНЫЙ ТЕКСТ
         uploadArea.innerHTML = originalText;
+        uploadArea.style.opacity = '1';
         renderPhotoList(photoListId, urlsArray);
         
         if (successCount > 0 && errorCount === 0) {
-            showMessage(messageId, `Загружено ${successCount} файлов`, 'success');
+            showMessage(messageId, `✅ Загружено ${successCount} файлов!`, 'success');
         } else if (successCount > 0 && errorCount > 0) {
-            showMessage(messageId, `Загружено ${successCount} файлов, ошибок: ${errorCount}`, 'error');
+            showMessage(messageId, `✅ Загружено ${successCount} файлов, ❌ ошибок: ${errorCount}`, 'error');
         } else {
-            showMessage(messageId, 'Не удалось загрузить файлы. Попробуйте ещё раз.', 'error');
+            showMessage(messageId, '❌ Не удалось загрузить файлы. Попробуйте ещё раз.', 'error');
         }
     }
     
