@@ -1171,154 +1171,6 @@
             }
         }
         
-        /* ===== НОВЫЕ СТИЛИ ДЛЯ ВЫБОРА ИСТОЧНИКА ===== */
-        .upload-choice-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 5000;
-            display: none;
-            justify-content: center;
-            align-items: flex-end;
-            padding: 20px;
-        }
-        
-        .upload-choice-overlay.show {
-            display: flex;
-        }
-        
-        .upload-choice-menu {
-            background: rgba(211, 193, 160, 0.98);
-            backdrop-filter: blur(12px);
-            border-radius: 20px;
-            padding: 15px;
-            width: 100%;
-            max-width: 400px;
-            animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        
-        @keyframes slideUp {
-            0% {
-                transform: translateY(100%);
-                opacity: 0;
-            }
-            100% {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        .upload-choice-menu h4 {
-            text-align: center;
-            margin-bottom: 15px;
-            font-size: 16px;
-            color: #585149;
-        }
-        
-        .upload-choice-option {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            width: 100%;
-            padding: 14px 18px;
-            margin: 8px 0;
-            background: rgba(240, 237, 229, 0.9);
-            border: none;
-            border-radius: 14px;
-            cursor: pointer;
-            font-size: 16px;
-            color: #585149;
-            transition: all 0.3s ease;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        .upload-choice-option:hover {
-            background: rgba(232, 224, 208, 1);
-            transform: translateX(4px);
-        }
-        
-        .upload-choice-option:active {
-            transform: scale(0.97);
-        }
-        
-        .upload-choice-option .icon {
-            font-size: 22px;
-            width: 30px;
-            text-align: center;
-        }
-        
-        .upload-choice-cancel {
-            width: 100%;
-            padding: 14px;
-            margin-top: 8px;
-            background: rgba(88, 81, 73, 0.15);
-            border: none;
-            border-radius: 14px;
-            cursor: pointer;
-            font-size: 16px;
-            color: #585149;
-            transition: all 0.3s ease;
-            touch-action: manipulation;
-        }
-        
-        .upload-choice-cancel:hover {
-            background: rgba(88, 81, 73, 0.25);
-        }
-        
-        .upload-choice-cancel:active {
-            transform: scale(0.97);
-        }
-        
-        .photo-list-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 6px;
-        }
-        
-        .photo-list-header .sort-photos-btn {
-            background: #585149;
-            color: #f0ede5;
-            border: none;
-            padding: 6px 14px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            touch-action: manipulation;
-            white-space: nowrap;
-        }
-        
-        .photo-list-header .sort-photos-btn:hover {
-            background: #6b6258;
-            transform: translateY(-1px) scale(1.05);
-            box-shadow: 0 2px 10px rgba(88, 81, 73, 0.2);
-        }
-        
-        .photo-list-header .sort-photos-btn:active {
-            transform: scale(0.95);
-        }
-        
-        @media (max-width: 600px) {
-            .photo-list-header .sort-photos-btn {
-                font-size: 11px;
-                padding: 5px 12px;
-                transition: background 0.3s ease;
-            }
-            .photo-list-header .sort-photos-btn:hover {
-                transform: none;
-            }
-            .photo-list-header .sort-photos-btn:active {
-                transform: none;
-            }
-        }
-        
         .photos-list {
             background: rgba(240, 237, 229, 0.8);
             border-radius: 12px;
@@ -1337,7 +1189,6 @@
             margin: 6px 0;
             border-radius: 10px;
             transition: all 0.3s ease;
-            cursor: pointer;
         }
         
         .photo-item:hover {
@@ -1359,16 +1210,12 @@
             height: 40px;
             object-fit: cover;
             border-radius: 8px;
-            pointer-events: none;
-            user-select: none;
-            -webkit-user-drag: none;
         }
         
         .photo-item span {
             flex: 1;
             font-size: 12px;
             color: #585149;
-            word-break: break-word;
         }
         
         .photo-item button {
@@ -1381,7 +1228,6 @@
             color: #585149;
             transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             touch-action: manipulation;
-            flex-shrink: 0;
         }
         
         .photo-item button:hover {
@@ -2663,13 +2509,8 @@
         <div id="adminUploadArea" class="upload-area">
             Перетащите файлы или нажмите для выбора
         </div>
-        <input type="file" id="adminFileInput" multiple accept="image/*" style="display:none">
-        <input type="file" id="adminVideoInput" multiple accept="video/*" style="display:none">
+        <input type="file" id="adminFileInput" multiple accept="image/*,video/*" style="display:none">
         
-        <div class="photo-list-header">
-            <span style="font-size: 14px; color: #585149; font-weight: 500;">Загруженные файлы:</span>
-            <button class="sort-photos-btn" onclick="sortAdminPhotos()">Сортировать по номеру</button>
-        </div>
         <div id="adminPhotoList" class="photos-list"></div>
         
         <h3>2. Введите код для этих параметров</h3>
@@ -2726,8 +2567,7 @@
             <div id="showcaseUploadArea" class="upload-area">
                 Перетащите картинку или нажмите для выбора
             </div>
-            <input type="file" id="showcaseFileInput" accept="image/*" style="display:none">
-            <input type="file" id="showcaseVideoInput" accept="video/*" style="display:none">
+            <input type="file" id="showcaseFileInput" accept="image/*,video/*" style="display:none">
             
             <div id="showcasePreview" style="display: none; margin-top: 12px; padding: 10px; background: #e8e0d0; border-radius: 12px; text-align: center;">
                 <div style="font-size: 12px; color: #7a6e5f; margin-bottom: 6px;">Предпросмотр:</div>
@@ -2766,13 +2606,8 @@
     <div id="workerUploadArea" class="upload-area">
         Перетащите файлы или нажмите для выбора
     </div>
-    <input type="file" id="workerFileInput" multiple accept="image/*" style="display:none">
-    <input type="file" id="workerVideoInput" multiple accept="video/*" style="display:none">
+    <input type="file" id="workerFileInput" multiple accept="image/*,video/*" style="display:none">
     
-    <div class="photo-list-header">
-        <span style="font-size: 14px; color: #585149; font-weight: 500;">Загруженные файлы:</span>
-        <button class="sort-photos-btn" onclick="sortWorkerPhotos()">Сортировать по номеру</button>
-    </div>
     <div id="workerPhotoList" class="photos-list"></div>
     
     <h3>2. Введите код для этих параметров</h3>
@@ -2792,13 +2627,8 @@
     <div id="assistantUploadArea" class="upload-area">
         Перетащите файлы или нажмите для выбора
     </div>
-    <input type="file" id="assistantFileInput" multiple accept="image/*" style="display:none">
-    <input type="file" id="assistantVideoInput" multiple accept="video/*" style="display:none">
+    <input type="file" id="assistantFileInput" multiple accept="image/*,video/*" style="display:none">
     
-    <div class="photo-list-header">
-        <span style="font-size: 14px; color: #585149; font-weight: 500;">Загруженные файлы:</span>
-        <button class="sort-photos-btn" onclick="sortAssistantPhotos()">Сортировать по номеру</button>
-    </div>
     <div id="assistantPhotoList" class="photos-list"></div>
     
     <h3>2. Введите код для этих параметров</h3>
@@ -2820,22 +2650,6 @@
     </div>
 </div>
 
-<!-- ===== МЕНЮ ВЫБОРА ИСТОЧНИКА ЗАГРУЗКИ (ДЛЯ ТЕЛЕФОНА) ===== -->
-<div id="uploadChoiceOverlay" class="upload-choice-overlay">
-    <div class="upload-choice-menu">
-        <h4>Откуда загрузить файл?</h4>
-        <button class="upload-choice-option" id="choiceGallery">
-            <span class="icon">🖼️</span>
-            <span>Выбрать из галереи (фото)</span>
-        </button>
-        <button class="upload-choice-option" id="choiceVideo">
-            <span class="icon">🎬</span>
-            <span>Выбрать видео</span>
-        </button>
-        <button class="upload-choice-cancel" id="choiceCancel">Отмена</button>
-    </div>
-</div>
-
 <script>
     // ===== ПАДАЮЩИЕ ЗВЁЗДОЧКИ =====
     (function createFallingStars() {
@@ -2845,6 +2659,7 @@
         const starSymbols = ['✦', '✧', '⋆', '✦', '✧'];
         const starColor = '#c1a27f';
         const isMobile = window.innerWidth <= 600;
+        // На телефоне 20 звёзд, на ПК — 40
         const starCount = isMobile ? 20 : 40;
         
         for (let i = 0; i < starCount; i++) {
@@ -2882,7 +2697,7 @@
                 target.closest('.photo-card') || target.closest('.showcase-card') ||
                 target.closest('.login-close') || target.closest('.close-notification') ||
                 target.closest('.close-admin') || target.closest('.close-worker') ||
-                target.closest('.close-assistant') || target.closest('.upload-choice-overlay'))) {
+                target.closest('.close-assistant'))) {
                 return;
             }
             
@@ -3049,9 +2864,6 @@
     let isAdminUser = false;
     let isWorkerUser = false;
     let isAssistantUser = false;
-    
-    // Переменная для хранения текущей роли загрузки
-    let currentUploadRole = 'admin';
     
     // ===== ФУНКЦИИ ДЛЯ КАПЧИ =====
     function checkSearchCaptcha() {
@@ -3471,45 +3283,8 @@
         }
     }
     
-    // ===== ФУНКЦИЯ ОТКРЫТИЯ ВЫБОРА ИСТОЧНИКА =====
-    function openUploadChoice(role) {
-        currentUploadRole = role;
-        document.getElementById('uploadChoiceOverlay').classList.add('show');
-    }
-    
-    function closeUploadChoice() {
-        document.getElementById('uploadChoiceOverlay').classList.remove('show');
-    }
-    
-    // ===== ОБРАБОТЧИКИ ВЫБОРА =====
-    document.getElementById('choiceGallery').addEventListener('click', () => {
-        closeUploadChoice();
-        const inputId = currentUploadRole === 'admin' ? 'adminFileInput' :
-                        currentUploadRole === 'worker' ? 'workerFileInput' :
-                        currentUploadRole === 'assistant' ? 'assistantFileInput' :
-                        'showcaseFileInput';
-        document.getElementById(inputId).click();
-    });
-    
-    document.getElementById('choiceVideo').addEventListener('click', () => {
-        closeUploadChoice();
-        const inputId = currentUploadRole === 'admin' ? 'adminVideoInput' :
-                        currentUploadRole === 'worker' ? 'workerVideoInput' :
-                        currentUploadRole === 'assistant' ? 'assistantVideoInput' :
-                        'showcaseVideoInput';
-        document.getElementById(inputId).click();
-    });
-    
-    document.getElementById('choiceCancel').addEventListener('click', closeUploadChoice);
-    
-    document.getElementById('uploadChoiceOverlay').addEventListener('click', (e) => {
-        if (e.target === document.getElementById('uploadChoiceOverlay')) {
-            closeUploadChoice();
-        }
-    });
-    
     async function handleShowcaseImage(file) {
-        if (!file || (!file.type.startsWith('image/') && !file.type.startsWith('video/'))) return;
+        if (!file || !file.type.startsWith('image/')) return;
         
         const uploadArea = document.getElementById('showcaseUploadArea');
         const originalText = uploadArea.innerHTML;
@@ -3535,16 +3310,15 @@
                 }
             }, 2000);
             
-            showMessage('adminMessage', 'Файл загружен!', 'success');
+            showMessage('adminMessage', 'Изображение загружено!', 'success');
         } else {
-            showMessage('adminMessage', 'Не удалось загрузить файл', 'error');
+            showMessage('adminMessage', 'Не удалось загрузить изображение', 'error');
         }
     }
     
     function setupShowcaseDragAndDrop() {
         const dropArea = document.getElementById('showcaseUploadArea');
         const fileInput = document.getElementById('showcaseFileInput');
-        const videoInput = document.getElementById('showcaseVideoInput');
         if (!dropArea) return;
         
         dropArea.ondragover = (e) => {
@@ -3562,25 +3336,12 @@
                 await handleShowcaseImage(files[0]);
             }
         };
-        dropArea.onclick = () => {
-            // На мобильных открываем меню выбора
-            if (window.innerWidth <= 600) {
-                openUploadChoice('showcase');
-            } else {
-                fileInput.click();
-            }
-        };
+        dropArea.onclick = () => fileInput.click();
         fileInput.onchange = async (e) => {
             if (e.target.files.length > 0) {
                 await handleShowcaseImage(e.target.files[0]);
             }
             fileInput.value = '';
-        };
-        videoInput.onchange = async (e) => {
-            if (e.target.files.length > 0) {
-                await handleShowcaseImage(e.target.files[0]);
-            }
-            videoInput.value = '';
         };
     }
     
@@ -4773,7 +4534,6 @@
     function setupAdminDragAndDrop() {
         const dropArea = document.getElementById('adminUploadArea');
         const fileInput = document.getElementById('adminFileInput');
-        const videoInput = document.getElementById('adminVideoInput');
         if (!dropArea) return;
         
         dropArea.ondragover = (e) => {
@@ -4788,20 +4548,10 @@
             dropArea.classList.remove('drag-over');
             await handleAdminFiles(e.dataTransfer.files);
         };
-        dropArea.onclick = () => {
-            if (window.innerWidth <= 600) {
-                openUploadChoice('admin');
-            } else {
-                fileInput.click();
-            }
-        };
+        dropArea.onclick = () => fileInput.click();
         fileInput.onchange = async (e) => {
             await handleAdminFiles(e.target.files);
             fileInput.value = '';
-        };
-        videoInput.onchange = async (e) => {
-            await handleAdminFiles(e.target.files);
-            videoInput.value = '';
         };
     }
     
@@ -4851,7 +4601,6 @@
     function setupWorkerDragAndDrop() {
         const dropArea = document.getElementById('workerUploadArea');
         const fileInput = document.getElementById('workerFileInput');
-        const videoInput = document.getElementById('workerVideoInput');
         if (!dropArea) return;
         
         dropArea.ondragover = (e) => {
@@ -4866,20 +4615,10 @@
             dropArea.classList.remove('drag-over');
             await handleWorkerFiles(e.dataTransfer.files);
         };
-        dropArea.onclick = () => {
-            if (window.innerWidth <= 600) {
-                openUploadChoice('worker');
-            } else {
-                fileInput.click();
-            }
-        };
+        dropArea.onclick = () => fileInput.click();
         fileInput.onchange = async (e) => {
             await handleWorkerFiles(e.target.files);
             fileInput.value = '';
-        };
-        videoInput.onchange = async (e) => {
-            await handleWorkerFiles(e.target.files);
-            videoInput.value = '';
         };
     }
     
@@ -4960,7 +4699,6 @@
     function setupAssistantDragAndDrop() {
         const dropArea = document.getElementById('assistantUploadArea');
         const fileInput = document.getElementById('assistantFileInput');
-        const videoInput = document.getElementById('assistantVideoInput');
         if (!dropArea) return;
         
         dropArea.ondragover = (e) => {
@@ -4975,20 +4713,10 @@
             dropArea.classList.remove('drag-over');
             await handleAssistantFiles(e.dataTransfer.files);
         };
-        dropArea.onclick = () => {
-            if (window.innerWidth <= 600) {
-                openUploadChoice('assistant');
-            } else {
-                fileInput.click();
-            }
-        };
+        dropArea.onclick = () => fileInput.click();
         fileInput.onchange = async (e) => {
             await handleAssistantFiles(e.target.files);
             fileInput.value = '';
-        };
-        videoInput.onchange = async (e) => {
-            await handleAssistantFiles(e.target.files);
-            videoInput.value = '';
         };
     }
     
