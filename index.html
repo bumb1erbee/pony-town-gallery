@@ -1171,108 +1171,6 @@
             }
         }
         
-        /* ===== НОВЫЕ СТИЛИ ДЛЯ ВЫБОРА ИСТОЧНИКА ===== */
-        .upload-choice-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 5000;
-            display: none;
-            justify-content: center;
-            align-items: flex-end;
-            padding: 20px;
-        }
-        
-        .upload-choice-overlay.show {
-            display: flex;
-        }
-        
-        .upload-choice-menu {
-            background: rgba(211, 193, 160, 0.98);
-            backdrop-filter: blur(12px);
-            border-radius: 20px;
-            padding: 15px;
-            width: 100%;
-            max-width: 400px;
-            animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        
-        @keyframes slideUp {
-            0% {
-                transform: translateY(100%);
-                opacity: 0;
-            }
-            100% {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        .upload-choice-menu h4 {
-            text-align: center;
-            margin-bottom: 15px;
-            font-size: 16px;
-            color: #585149;
-        }
-        
-        .upload-choice-option {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            width: 100%;
-            padding: 14px 18px;
-            margin: 8px 0;
-            background: rgba(240, 237, 229, 0.9);
-            border: none;
-            border-radius: 14px;
-            cursor: pointer;
-            font-size: 16px;
-            color: #585149;
-            transition: all 0.3s ease;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        .upload-choice-option:hover {
-            background: rgba(232, 224, 208, 1);
-            transform: translateX(4px);
-        }
-        
-        .upload-choice-option:active {
-            transform: scale(0.97);
-        }
-        
-        .upload-choice-option .icon {
-            font-size: 22px;
-            width: 30px;
-            text-align: center;
-        }
-        
-        .upload-choice-cancel {
-            width: 100%;
-            padding: 14px;
-            margin-top: 8px;
-            background: rgba(88, 81, 73, 0.15);
-            border: none;
-            border-radius: 14px;
-            cursor: pointer;
-            font-size: 16px;
-            color: #585149;
-            transition: all 0.3s ease;
-            touch-action: manipulation;
-        }
-        
-        .upload-choice-cancel:hover {
-            background: rgba(88, 81, 73, 0.25);
-        }
-        
-        .upload-choice-cancel:active {
-            transform: scale(0.97);
-        }
-        
         .photo-list-header {
             display: flex;
             justify-content: space-between;
@@ -2557,6 +2455,131 @@
                 height: 16px;
             }
         }
+        
+        /* ===== ДОПОЛНИТЕЛЬНЫЕ СТИЛИ ДЛЯ ВЫПАДАЮЩЕГО СПИСКА В ВИТРИНЕ ===== */
+        .showcase-select-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .showcase-select-wrapper select {
+            flex: 1;
+            padding-right: 30px;
+        }
+        
+        .showcase-select-wrapper .sort-direction-btn {
+            flex-shrink: 0;
+            padding: 6px 10px;
+            font-size: 13px;
+        }
+        
+        .showcase-select-wrapper .sort-direction-btn:hover {
+            background: #b3926e;
+        }
+        
+        /* ===== МЕНЮ ВЫБОРА ИСТОЧНИКА (для телефона) ===== */
+        .upload-choice-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 5000;
+            display: none;
+            justify-content: center;
+            align-items: flex-end;
+            padding: 20px;
+        }
+        
+        .upload-choice-overlay.show {
+            display: flex;
+        }
+        
+        .upload-choice-menu {
+            background: rgba(211, 193, 160, 0.98);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 15px;
+            width: 100%;
+            max-width: 400px;
+            animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes slideUp {
+            0% {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .upload-choice-menu h4 {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: #585149;
+        }
+        
+        .upload-choice-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 14px 18px;
+            margin: 8px 0;
+            background: rgba(240, 237, 229, 0.9);
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 16px;
+            color: #585149;
+            transition: all 0.3s ease;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .upload-choice-option:hover {
+            background: rgba(232, 224, 208, 1);
+            transform: translateX(4px);
+        }
+        
+        .upload-choice-option:active {
+            transform: scale(0.97);
+        }
+        
+        .upload-choice-option .icon {
+            font-size: 22px;
+            width: 30px;
+            text-align: center;
+        }
+        
+        .upload-choice-cancel {
+            width: 100%;
+            padding: 14px;
+            margin-top: 8px;
+            background: rgba(88, 81, 73, 0.15);
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 16px;
+            color: #585149;
+            transition: all 0.3s ease;
+            touch-action: manipulation;
+        }
+        
+        .upload-choice-cancel:hover {
+            background: rgba(88, 81, 73, 0.25);
+        }
+        
+        .upload-choice-cancel:active {
+            transform: scale(0.97);
+        }
     </style>
 </head>
 <body>
@@ -2722,7 +2745,12 @@
         
         <div class="add-showcase-area">
             <h4>Добавить скин в витрину</h4>
-            <select id="showcaseCodeSelect" class="code-input"></select>
+            
+            <div class="showcase-select-wrapper">
+                <select id="showcaseCodeSelect" class="code-input"></select>
+                <button class="sort-direction-btn" id="showcaseSortDirectionBtn" onclick="toggleShowcaseSortDirection()" title="Поменять направление сортировки">↑</button>
+            </div>
+            
             <div id="showcaseUploadArea" class="upload-area">
                 Перетащите картинку или нажмите для выбора
             </div>
@@ -3004,18 +3032,20 @@
     let currentPhotosList = [];
     let currentPhotoIndex = 0;
     
-    let adminUploadedUrls = [];
+    // Массивы объектов { url, name }
+    let adminUploadedFiles = [];
     let adminEditMode = false;
     let adminEditCodeName = null;
     
-    let workerUploadedUrls = [];
-    let assistantUploadedUrls = [];
+    let workerUploadedFiles = [];
+    let assistantUploadedFiles = [];
     
     let showcaseUploadedImage = null;
     
     let allCodesData = [];
     let codesSortType = 'date';
     let sortAscending = true;
+    let showcaseSortAscending = true;
     
     let allShowcaseCodes = [];
     
@@ -3050,8 +3080,17 @@
     let isWorkerUser = false;
     let isAssistantUser = false;
     
-    // Переменная для хранения текущей роли загрузки
+    // Переменная для текущей роли загрузки
     let currentUploadRole = 'admin';
+    
+    // ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
+    function getFileUrls(filesArray) {
+        return filesArray.map(f => f.url);
+    }
+    
+    function getFileDisplayName(file) {
+        return file.name.replace(/\.[^/.]+$/, '');
+    }
     
     // ===== ФУНКЦИИ ДЛЯ КАПЧИ =====
     function checkSearchCaptcha() {
@@ -3081,6 +3120,90 @@
         const btn = document.getElementById('sortDirectionBtn');
         btn.textContent = sortAscending ? '↑' : '↓';
         renderCodesList();
+    }
+    
+    function toggleShowcaseSortDirection() {
+        showcaseSortAscending = !showcaseSortAscending;
+        const btn = document.getElementById('showcaseSortDirectionBtn');
+        btn.textContent = showcaseSortAscending ? '↑' : '↓';
+        loadCodesForSelect();
+    }
+    
+    // ===== ФУНКЦИИ СОРТИРОВКИ ФАЙЛОВ ПО НОМЕРУ =====
+    function extractNumberFromFilename(filename) {
+        const match = filename.match(/(\d+)/);
+        if (match) {
+            return parseInt(match[0]);
+        }
+        return Infinity;
+    }
+    
+    function sortFilesByNumber(filesArray) {
+        return filesArray.sort((a, b) => {
+            const numA = extractNumberFromFilename(a.name);
+            const numB = extractNumberFromFilename(b.name);
+            return numA - numB;
+        });
+    }
+    
+    function sortAdminPhotos() {
+        if (adminUploadedFiles.length === 0) {
+            showMessage('adminMessage', 'Нет файлов для сортировки', 'error');
+            return;
+        }
+        adminUploadedFiles = sortFilesByNumber(adminUploadedFiles);
+        renderAdminPhotoList();
+        showMessage('adminMessage', 'Файлы отсортированы по номеру!', 'success');
+    }
+    
+    function sortWorkerPhotos() {
+        if (workerUploadedFiles.length === 0) {
+            showMessage('workerMessage', 'Нет файлов для сортировки', 'error');
+            return;
+        }
+        workerUploadedFiles = sortFilesByNumber(workerUploadedFiles);
+        renderWorkerPhotoList();
+        showMessage('workerMessage', 'Файлы отсортированы по номеру!', 'success');
+    }
+    
+    function sortAssistantPhotos() {
+        if (assistantUploadedFiles.length === 0) {
+            showMessage('assistantMessage', 'Нет файлов для сортировки', 'error');
+            return;
+        }
+        assistantUploadedFiles = sortFilesByNumber(assistantUploadedFiles);
+        renderAssistantPhotoList();
+        showMessage('assistantMessage', 'Файлы отсортированы по номеру!', 'success');
+    }
+    
+    // ===== ФУНКЦИЯ ДЛЯ ОТКРЫТИЯ ФОТО В МОДАЛКЕ =====
+    function openPhotoModal(url) {
+        const modal = document.getElementById('modal');
+        const modalImg = document.getElementById('modalImage');
+        const videoPlayer = document.getElementById('videoPlayer');
+        const isVideoFile = isVideo(url);
+        
+        if (isVideoFile) {
+            modalImg.style.display = 'none';
+            videoPlayer.style.display = 'block';
+            videoPlayer.src = url;
+            videoPlayer.load();
+            videoPlayer.play();
+        } else {
+            modalImg.style.display = 'block';
+            videoPlayer.style.display = 'none';
+            videoPlayer.pause();
+            modalImg.src = url;
+        }
+        
+        currentPhotosList = [url];
+        currentPhotoIndex = 0;
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        resetZoom();
+        updateCounter();
+        updateArrows();
+        updateZoomHint();
     }
     
     function isVideo(url) {
@@ -3452,14 +3575,25 @@
                 codesArray.push({ code, filesCount: files.length, isInShowcase });
             });
             
-            codesArray.sort((a, b) => {
-                const numA = parseInt(a.code);
-                const numB = parseInt(b.code);
-                if (!isNaN(numA) && !isNaN(numB)) {
-                    return numA - numB;
-                }
-                return a.code.localeCompare(b.code);
-            });
+            if (!showcaseSortAscending) {
+                codesArray.sort((a, b) => {
+                    const numA = parseInt(a.code);
+                    const numB = parseInt(b.code);
+                    if (!isNaN(numA) && !isNaN(numB)) {
+                        return numB - numA;
+                    }
+                    return b.code.localeCompare(a.code);
+                });
+            } else {
+                codesArray.sort((a, b) => {
+                    const numA = parseInt(a.code);
+                    const numB = parseInt(b.code);
+                    if (!isNaN(numA) && !isNaN(numB)) {
+                        return numA - numB;
+                    }
+                    return a.code.localeCompare(b.code);
+                });
+            }
             
             select.innerHTML = '<option value="">Выберите код</option>';
             codesArray.forEach(item => {
@@ -3516,17 +3650,17 @@
         
         showLoading(uploadArea, originalText);
         
-        const url = await uploadToGitHub(file);
+        const result = await uploadToGitHub(file);
         
         hideLoading(uploadArea);
         
-        if (url) {
-            showcaseUploadedImage = url;
+        if (result) {
+            showcaseUploadedImage = result.url;
             uploadArea.innerHTML = `Файл загружен: ${file.name.substring(0, 30)} ✓`;
             
             const previewDiv = document.getElementById('showcasePreview');
             const previewImg = document.getElementById('showcasePreviewImage');
-            previewImg.src = url;
+            previewImg.src = result.url;
             previewDiv.style.display = 'block';
             
             setTimeout(() => {
@@ -3563,7 +3697,6 @@
             }
         };
         dropArea.onclick = () => {
-            // На мобильных открываем меню выбора
             if (window.innerWidth <= 600) {
                 openUploadChoice('showcase');
             } else {
@@ -4314,8 +4447,12 @@
                 body: formData
             });
             const data = await response.json();
-            if (data.url) return data.url;
-            else return null;
+            if (data.url) {
+                // Возвращаем объект с url и исходным именем
+                return { url: data.url, name: file.name };
+            } else {
+                return null;
+            }
         } catch (error) {
             console.error('Ошибка загрузки:', error);
             return null;
@@ -4639,7 +4776,8 @@
             if (doc.exists) {
                 adminEditMode = true;
                 adminEditCodeName = code;
-                adminUploadedUrls = doc.data().photos || [];
+                // Загружаем файлы как объекты { url, name }
+                adminUploadedFiles = doc.data().photos.map(url => ({ url, name: url.split('/').pop() }));
                 document.getElementById('adminCodeName').value = code;
                 renderAdminPhotoList();
                 showMessage('adminMessage', `Редактирование кода: ${code}. Добавьте новые файлы или удалите лишние.`, 'success');
@@ -4653,31 +4791,35 @@
     function exitAdminEditMode() {
         adminEditMode = false;
         adminEditCodeName = null;
-        adminUploadedUrls = [];
+        adminUploadedFiles = [];
         document.getElementById('adminCodeName').value = '';
         renderAdminPhotoList();
     }
     
     function renderAdminPhotoList() {
         const container = document.getElementById('adminPhotoList');
-        if (adminUploadedUrls.length === 0) {
+        if (adminUploadedFiles.length === 0) {
             container.innerHTML = '<div style="text-align:center; padding:20px;">Нет файлов</div>';
             return;
         }
         
         let html = '';
-        for (let i = 0; i < adminUploadedUrls.length; i++) {
-            const url = adminUploadedUrls[i];
+        for (let i = 0; i < adminUploadedFiles.length; i++) {
+            const file = adminUploadedFiles[i];
+            const url = file.url;
             const isVideoFile = isVideo(url);
+            const displayName = getFileDisplayName(file);
+            const displayNumber = i + 1;
+            
+            const thumbnail = isVideoFile ? 
+                `<video src="${url}" muted preload="metadata" style="width:40px; height:40px; object-fit:cover; border-radius:8px; background:#000;" onclick="event.stopPropagation(); openPhotoModal('${url}')"></video>` :
+                `<img src="${url}" onclick="event.stopPropagation(); openPhotoModal('${url}')" loading="lazy" onerror="this.style.opacity='0.3'" style="cursor:pointer;">`;
             
             html += `
-                <div class="photo-item">
-                    ${isVideoFile ? 
-                        `<video src="${url}" muted preload="metadata" style="width:40px; height:40px; object-fit:cover; border-radius:8px; background:#000;"></video>` :
-                        `<img src="${url}">`
-                    }
-                    <span>Файл ${i + 1}</span>
-                    <button onclick="removeAdminPhoto(${i})">✖</button>
+                <div class="photo-item" onclick="openPhotoModal('${url}')">
+                    ${thumbnail}
+                    <span>${displayNumber} — ${escapeHtml(displayName)}</span>
+                    <button onclick="event.stopPropagation(); removeAdminPhoto(${i})">✖</button>
                 </div>
             `;
         }
@@ -4685,7 +4827,7 @@
     }
     
     function removeAdminPhoto(index) {
-        adminUploadedUrls.splice(index, 1);
+        adminUploadedFiles.splice(index, 1);
         renderAdminPhotoList();
     }
     
@@ -4699,7 +4841,7 @@
             showMessage('adminMessage', 'Введите код!', 'error');
             return;
         }
-        if (adminUploadedUrls.length === 0) {
+        if (adminUploadedFiles.length === 0) {
             showMessage('adminMessage', 'Нет файлов! Сначала перетащите файлы', 'error');
             return;
         }
@@ -4724,12 +4866,14 @@
                 await db.collection('codes').doc(adminEditCodeName).delete();
             }
             
+            // Сохраняем только URL-адреса в Firebase
+            const urls = adminUploadedFiles.map(f => f.url);
             await db.collection('codes').doc(code).set({
-                photos: adminUploadedUrls,
+                photos: urls,
                 createdAt: new Date().toISOString()
             });
             
-            adminUploadedUrls = [];
+            adminUploadedFiles = [];
             renderAdminPhotoList();
             document.getElementById('adminCodeName').value = '';
             exitAdminEditMode();
@@ -4758,15 +4902,15 @@
         for (let i = 0; i < imageFiles.length; i++) {
             const file = imageFiles[i];
             uploadArea.innerHTML = `Загрузка ${i + 1}/${imageFiles.length}: ${file.name.substring(0, 30)}... <span class="loading"></span>`;
-            const url = await uploadToGitHub(file);
-            if (url) {
-                adminUploadedUrls.push(url);
+            const result = await uploadToGitHub(file);
+            if (result) {
+                adminUploadedFiles.push(result);
                 renderAdminPhotoList();
             }
             uploadArea.innerHTML = originalText;
         }
         if (imageFiles.length > 0) {
-            showMessage('adminMessage', `Загружено ${adminUploadedUrls.length} файлов`, 'success');
+            showMessage('adminMessage', `Загружено ${adminUploadedFiles.length} файлов`, 'success');
         }
     }
     
@@ -4815,34 +4959,19 @@
         uploadArea.innerHTML = `Загрузка ${imageFiles.length} файлов... <span class="loading"></span>`;
         
         const uploadPromises = imageFiles.map(async (file) => {
-            const formData = new FormData();
-            formData.append('file', file);
-            
-            try {
-                const response = await fetch(WORKER_URL, {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await response.json();
-                if (data.url) {
-                    return data.url;
-                }
-                return null;
-            } catch (error) {
-                console.error('Ошибка загрузки файла:', file.name, error);
-                return null;
-            }
+            const result = await uploadToGitHub(file);
+            return result;
         });
         
-        const urls = await Promise.all(uploadPromises);
-        const newUrls = urls.filter(url => url !== null);
-        workerUploadedUrls.push(...newUrls);
+        const results = await Promise.all(uploadPromises);
+        const newFiles = results.filter(r => r !== null);
+        workerUploadedFiles.push(...newFiles);
         
         uploadArea.innerHTML = originalText;
         renderWorkerPhotoList();
         
-        if (newUrls.length > 0) {
-            showMessage('workerMessage', `Загружено ${newUrls.length} файлов`, 'success');
+        if (newFiles.length > 0) {
+            showMessage('workerMessage', `Загружено ${newFiles.length} файлов`, 'success');
         } else if (imageFiles.length > 0) {
             showMessage('workerMessage', 'Не удалось загрузить файлы. Попробуйте ещё раз.', 'error');
         }
@@ -4885,24 +5014,28 @@
     
     function renderWorkerPhotoList() {
         const container = document.getElementById('workerPhotoList');
-        if (workerUploadedUrls.length === 0) {
+        if (workerUploadedFiles.length === 0) {
             container.innerHTML = '<div style="text-align:center; padding:20px;">Нет файлов</div>';
             return;
         }
         
         let html = '';
-        for (let i = 0; i < workerUploadedUrls.length; i++) {
-            const url = workerUploadedUrls[i];
+        for (let i = 0; i < workerUploadedFiles.length; i++) {
+            const file = workerUploadedFiles[i];
+            const url = file.url;
             const isVideoFile = isVideo(url);
+            const displayName = getFileDisplayName(file);
+            const displayNumber = i + 1;
+            
+            const thumbnail = isVideoFile ? 
+                `<video src="${url}" muted preload="metadata" style="width:40px; height:40px; object-fit:cover; border-radius:8px; background:#000;" onclick="event.stopPropagation(); openPhotoModal('${url}')"></video>` :
+                `<img src="${url}" onclick="event.stopPropagation(); openPhotoModal('${url}')" loading="lazy" onerror="this.style.opacity='0.3'" style="cursor:pointer;">`;
             
             html += `
-                <div class="photo-item">
-                    ${isVideoFile ? 
-                        `<video src="${url}" muted preload="metadata" style="width:40px; height:40px; object-fit:cover; border-radius:8px; background:#000;"></video>` :
-                        `<img src="${url}">`
-                    }
-                    <span>Файл ${i + 1}</span>
-                    <button onclick="removeWorkerPhoto(${i})">✖</button>
+                <div class="photo-item" onclick="openPhotoModal('${url}')">
+                    ${thumbnail}
+                    <span>${displayNumber} — ${escapeHtml(displayName)}</span>
+                    <button onclick="event.stopPropagation(); removeWorkerPhoto(${i})">✖</button>
                 </div>
             `;
         }
@@ -4910,7 +5043,7 @@
     }
     
     function removeWorkerPhoto(index) {
-        workerUploadedUrls.splice(index, 1);
+        workerUploadedFiles.splice(index, 1);
         renderWorkerPhotoList();
     }
     
@@ -4924,34 +5057,19 @@
         uploadArea.innerHTML = `Загрузка ${imageFiles.length} файлов... <span class="loading"></span>`;
         
         const uploadPromises = imageFiles.map(async (file) => {
-            const formData = new FormData();
-            formData.append('file', file);
-            
-            try {
-                const response = await fetch(WORKER_URL, {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await response.json();
-                if (data.url) {
-                    return data.url;
-                }
-                return null;
-            } catch (error) {
-                console.error('Ошибка загрузки файла:', file.name, error);
-                return null;
-            }
+            const result = await uploadToGitHub(file);
+            return result;
         });
         
-        const urls = await Promise.all(uploadPromises);
-        const newUrls = urls.filter(url => url !== null);
-        assistantUploadedUrls.push(...newUrls);
+        const results = await Promise.all(uploadPromises);
+        const newFiles = results.filter(r => r !== null);
+        assistantUploadedFiles.push(...newFiles);
         
         uploadArea.innerHTML = originalText;
         renderAssistantPhotoList();
         
-        if (newUrls.length > 0) {
-            showMessage('assistantMessage', `Загружено ${newUrls.length} файлов`, 'success');
+        if (newFiles.length > 0) {
+            showMessage('assistantMessage', `Загружено ${newFiles.length} файлов`, 'success');
         } else if (imageFiles.length > 0) {
             showMessage('assistantMessage', 'Не удалось загрузить файлы. Попробуйте ещё раз.', 'error');
         }
@@ -4994,24 +5112,28 @@
     
     function renderAssistantPhotoList() {
         const container = document.getElementById('assistantPhotoList');
-        if (assistantUploadedUrls.length === 0) {
+        if (assistantUploadedFiles.length === 0) {
             container.innerHTML = '<div style="text-align:center; padding:20px;">Нет файлов</div>';
             return;
         }
         
         let html = '';
-        for (let i = 0; i < assistantUploadedUrls.length; i++) {
-            const url = assistantUploadedUrls[i];
+        for (let i = 0; i < assistantUploadedFiles.length; i++) {
+            const file = assistantUploadedFiles[i];
+            const url = file.url;
             const isVideoFile = isVideo(url);
+            const displayName = getFileDisplayName(file);
+            const displayNumber = i + 1;
+            
+            const thumbnail = isVideoFile ? 
+                `<video src="${url}" muted preload="metadata" style="width:40px; height:40px; object-fit:cover; border-radius:8px; background:#000;" onclick="event.stopPropagation(); openPhotoModal('${url}')"></video>` :
+                `<img src="${url}" onclick="event.stopPropagation(); openPhotoModal('${url}')" loading="lazy" onerror="this.style.opacity='0.3'" style="cursor:pointer;">`;
             
             html += `
-                <div class="photo-item">
-                    ${isVideoFile ? 
-                        `<video src="${url}" muted preload="metadata" style="width:40px; height:40px; object-fit:cover; border-radius:8px; background:#000;"></video>` :
-                        `<img src="${url}">`
-                    }
-                    <span>Файл ${i + 1}</span>
-                    <button onclick="removeAssistantPhoto(${i})">✖</button>
+                <div class="photo-item" onclick="openPhotoModal('${url}')">
+                    ${thumbnail}
+                    <span>${displayNumber} — ${escapeHtml(displayName)}</span>
+                    <button onclick="event.stopPropagation(); removeAssistantPhoto(${i})">✖</button>
                 </div>
             `;
         }
@@ -5019,26 +5141,26 @@
     }
     
     function removeAssistantPhoto(index) {
-        assistantUploadedUrls.splice(index, 1);
+        assistantUploadedFiles.splice(index, 1);
         renderAssistantPhotoList();
     }
     
     async function sendRequest(role) {
         let isAuthorized = false;
-        let uploadedUrls = [];
+        let uploadedFiles = [];
         let codeInputId = '';
         let messageContainerId = '';
         let sendButton = null;
         
         if (role === 'worker' && isWorkerUser) {
             isAuthorized = true;
-            uploadedUrls = workerUploadedUrls;
+            uploadedFiles = workerUploadedFiles;
             codeInputId = 'workerCodeName';
             messageContainerId = 'workerMessage';
             sendButton = document.querySelector('#workerPanel .save-btn');
         } else if (role === 'assistant' && isAssistantUser) {
             isAuthorized = true;
-            uploadedUrls = assistantUploadedUrls;
+            uploadedFiles = assistantUploadedFiles;
             codeInputId = 'assistantCodeName';
             messageContainerId = 'assistantMessage';
             sendButton = document.querySelector('#assistantPanel .save-btn');
@@ -5054,7 +5176,7 @@
             showMessage(messageContainerId, 'Введите код!', 'error');
             return;
         }
-        if (uploadedUrls.length === 0) {
+        if (uploadedFiles.length === 0) {
             showMessage(messageContainerId, 'Нет файлов! Сначала перетащите файлы', 'error');
             return;
         }
@@ -5090,9 +5212,12 @@
                 return;
             }
             
+            // Отправляем только URL-адреса
+            const urls = uploadedFiles.map(f => f.url);
+            
             await db.collection('requests').add({
                 code: code,
-                photos: uploadedUrls,
+                photos: urls,
                 status: 'pending',
                 userId: currentUser.uid,
                 userEmail: currentUser.email,
@@ -5101,12 +5226,12 @@
             });
             
             if (role === 'worker') {
-                workerUploadedUrls = [];
+                workerUploadedFiles = [];
                 renderWorkerPhotoList();
                 document.getElementById('workerCodeName').value = '';
                 showMessage('workerMessage', `Заявка на код "${code}" отправлена на модерацию!`, 'success');
             } else if (role === 'assistant') {
-                assistantUploadedUrls = [];
+                assistantUploadedFiles = [];
                 renderAssistantPhotoList();
                 document.getElementById('assistantCodeName').value = '';
                 showMessage('assistantMessage', `Заявка на код "${code}" отправлена на модерацию!`, 'success');
@@ -5150,7 +5275,7 @@
     }
     
     function exitAssistantMode() {
-        assistantUploadedUrls = [];
+        assistantUploadedFiles = [];
         renderAssistantPhotoList();
         document.getElementById('assistantCodeName').value = '';
         document.getElementById('assistantMessage').innerHTML = '';
@@ -5299,7 +5424,7 @@
     }
     
     function exitWorkerMode() {
-        workerUploadedUrls = [];
+        workerUploadedFiles = [];
         renderWorkerPhotoList();
         document.getElementById('workerCodeName').value = '';
         document.getElementById('workerMessage').innerHTML = '';
