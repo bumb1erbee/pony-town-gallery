@@ -1071,12 +1071,11 @@
             .admin-panel.collapsed,
             .worker-panel.collapsed,
             .assistant-panel.collapsed {
-                right: -400px;
-                width: 60px;
-                max-width: 60px;
-                padding: 10px 5px;
+                right: 0;
+                width: 50px;
+                max-width: 50px;
+                padding: 15px 5px;
                 overflow: hidden;
-                cursor: pointer;
             }
             
             .admin-panel.collapsed .panel-content-wrapper,
@@ -1089,10 +1088,12 @@
             .worker-panel.collapsed .worker-header,
             .assistant-panel.collapsed .assistant-header {
                 flex-direction: column;
-                gap: 10px;
+                gap: 0;
                 border-bottom: none;
                 margin-bottom: 0;
                 padding-bottom: 0;
+                justify-content: center;
+                align-items: center;
             }
             
             .admin-panel.collapsed .admin-header h2,
@@ -1107,8 +1108,17 @@
                 display: none;
             }
             
+            .admin-panel.collapsed .header-buttons,
+            .worker-panel.collapsed .header-buttons,
+            .assistant-panel.collapsed .header-buttons {
+                flex-direction: column;
+                gap: 0;
+                width: 100%;
+                align-items: center;
+            }
+            
             .panel-collapse-btn {
-                display: flex;
+                display: none;
                 align-items: center;
                 justify-content: center;
                 background: #585149;
@@ -1117,10 +1127,12 @@
                 border-radius: 50%;
                 width: 36px;
                 height: 36px;
-                font-size: 18px;
+                font-size: 16px;
                 cursor: pointer;
                 transition: all 0.3s ease;
                 flex-shrink: 0;
+                line-height: 1;
+                padding: 0;
             }
             
             .panel-collapse-btn:hover {
@@ -1128,24 +1140,20 @@
                 transform: scale(1.1);
             }
             
-            .admin-panel.collapsed .panel-collapse-btn,
-            .worker-panel.collapsed .panel-collapse-btn,
-            .assistant-panel.collapsed .panel-collapse-btn {
-                width: 40px;
-                height: 40px;
-                font-size: 20px;
-            }
-            
-            .admin-panel .panel-collapse-btn,
-            .worker-panel .panel-collapse-btn,
-            .assistant-panel .panel-collapse-btn {
-                display: none;
-            }
-            
             .admin-panel.open .panel-collapse-btn,
             .worker-panel.open .panel-collapse-btn,
             .assistant-panel.open .panel-collapse-btn {
                 display: flex;
+            }
+            
+            .admin-panel.collapsed .panel-collapse-btn,
+            .worker-panel.collapsed .panel-collapse-btn,
+            .assistant-panel.collapsed .panel-collapse-btn {
+                display: flex;
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+                margin: 0 auto;
             }
         }
         
@@ -3232,21 +3240,18 @@
     
     let currentUploadRole = 'admin';
     
-    // ===== DRAG-AND-DROP ДЛЯ ВИТРИНЫ =====
-    let draggedShowcaseId = null;
-    
     // ===== СВОРАЧИВАНИЕ ПАНЕЛЕЙ =====
     function togglePanelCollapse(panelId) {
         const panel = document.getElementById(panelId);
         if (!panel) return;
         
+        const btn = panel.querySelector('.panel-collapse-btn');
+        
         if (panel.classList.contains('collapsed')) {
             panel.classList.remove('collapsed');
-            const btn = panel.querySelector('.panel-collapse-btn');
             if (btn) btn.textContent = '◀';
         } else {
             panel.classList.add('collapsed');
-            const btn = panel.querySelector('.panel-collapse-btn');
             if (btn) btn.textContent = '▶';
         }
     }
@@ -3985,13 +3990,50 @@
         }
     }
     
-    // ===== DRAG-AND-DROP ДЛЯ ВИТРИНЫ =====
+    // ===== DRAG-AND-DROP ДЛЯ ВИТРИНЫ С АВТОСКРОЛЛОМ =====
+    let draggedShowcaseId = null;
+    let autoScrollInterval = null;
+    let lastDragY = 0;
+    
     function handleShowcaseDragStart(event, showcaseId) {
         draggedShowcaseId = showcaseId;
         event.target.classList.add('dragging');
         event.dataTransfer.effectAllowed = 'move';
         event.dataTransfer.setData('text/plain', showcaseId);
+        lastDragY = event.clientY;
+        
+        startAutoScrollCheck();
     }
+    
+    function startAutoScrollCheck() {
+        if (autoScrollInterval) clearInterval(autoScrollInterval);
+        autoScrollInterval = setInterval(() => {
+            if (!draggedShowcaseId) {
+                clearInterval(autoScrollInterval);
+                autoScrollInterval = null;
+                return;
+            }
+            
+            const container = document.getElementById('showcaseListContainer');
+            if (!container) return;
+            
+            const rect = container.getBoundingClientRect();
+            const scrollZone = 60;
+            const scrollSpeed = 8;
+            
+            if (lastDragY < rect.top + scrollZone) {
+                container.scrollTop -= scrollSpeed;
+            } else if (lastDragY > rect.bottom - scrollZone) {
+                container.scrollTop += scrollSpeed;
+            }
+        }, 30);
+    }
+    
+    document.addEventListener('dragover', function(e) {
+        if (draggedShowcaseId) {
+            lastDragY = e.clientY;
+        }
+    });
     
     function handleShowcaseDragOver(event) {
         event.preventDefault();
@@ -4015,7 +4057,11 @@
         const showcaseId = draggedShowcaseId;
         draggedShowcaseId = null;
         
-        // Определяем, вверх или вниз перетащили
+        if (autoScrollInterval) {
+            clearInterval(autoScrollInterval);
+            autoScrollInterval = null;
+        }
+        
         const allItems = document.querySelectorAll('.showcase-item');
         let draggedIndex = -1;
         let targetIndex = -1;
@@ -4033,6 +4079,13 @@
     function handleShowcaseDragEnd(event) {
         event.target.classList.remove('dragging');
         document.querySelectorAll('.showcase-item').forEach(el => el.classList.remove('drag-over'));
+        
+        if (autoScrollInterval) {
+            clearInterval(autoScrollInterval);
+            autoScrollInterval = null;
+        }
+        
+        draggedShowcaseId = null;
     }
     
     async function reorderShowcaseItems(draggedId, targetId, draggedIndex, targetIndex) {
@@ -4048,22 +4101,17 @@
             
             if (!draggedItem || !targetItem) return;
             
-            // Удаляем перетаскиваемый элемент
             const draggedIdx = items.indexOf(draggedItem);
             items.splice(draggedIdx, 1);
             
-            // Вставляем его перед или после целевого
             const newTargetIdx = items.indexOf(targetItem);
             
             if (draggedIndex < targetIndex) {
-                // Перетащили вниз — вставляем после целевого
                 items.splice(newTargetIdx + 1, 0, draggedItem);
             } else {
-                // Перетащили вверх — вставляем перед целевым
                 items.splice(newTargetIdx, 0, draggedItem);
             }
             
-            // Обновляем order у всех
             const batch = db.batch();
             items.forEach((item, idx) => {
                 const ref = db.collection('showcase').doc(item.id);
@@ -5610,6 +5658,7 @@
     function closeAdminPanel() {
         const adminPanel = document.getElementById('adminPanel');
         adminPanel.classList.remove('open');
+        adminPanel.classList.remove('collapsed');
         exitAdminEditMode();
         document.getElementById('adminNotification').innerHTML = '';
     }
@@ -5639,6 +5688,7 @@
     function closeWorkerPanel() {
         const workerPanel = document.getElementById('workerPanel');
         workerPanel.classList.remove('open');
+        workerPanel.classList.remove('collapsed');
         exitWorkerMode();
         document.getElementById('adminNotification').innerHTML = '';
     }
