@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Pony Town Gallery</title>
     
-    <!-- FAVICON -->
     <link rel="icon" type="image/png" href="https://i.postimg.cc/qvp6cNBd/favicon.png">
     
-    <!-- МЕТА-ОПИСАНИЕ ДЛЯ ПОИСКОВИКОВ -->
     <meta name="description" content="Pony Town Gallery — база скинов для Pony Town. Получайте параметры скинов по коду, просматривайте витрину и находите нужные образы.">
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -278,7 +276,6 @@
             display: block;
         }
         
-        /* Анимация для десктопа */
         @media (hover: hover) {
             .search-section:hover {
                 transform: translateX(-6px);
@@ -1069,6 +1066,95 @@
             right: 0;
         }
         
+        /* ===== СВЁРНУТЫЕ ПАНЕЛИ (только на ПК) ===== */
+        @media (min-width: 601px) {
+            .admin-panel.collapsed,
+            .worker-panel.collapsed,
+            .assistant-panel.collapsed {
+                right: -400px;
+                width: 60px;
+                max-width: 60px;
+                padding: 10px 5px;
+                overflow: hidden;
+                cursor: pointer;
+            }
+            
+            .admin-panel.collapsed .panel-content-wrapper,
+            .worker-panel.collapsed .panel-content-wrapper,
+            .assistant-panel.collapsed .panel-content-wrapper {
+                display: none;
+            }
+            
+            .admin-panel.collapsed .admin-header,
+            .worker-panel.collapsed .worker-header,
+            .assistant-panel.collapsed .assistant-header {
+                flex-direction: column;
+                gap: 10px;
+                border-bottom: none;
+                margin-bottom: 0;
+                padding-bottom: 0;
+            }
+            
+            .admin-panel.collapsed .admin-header h2,
+            .worker-panel.collapsed .worker-header h2,
+            .assistant-panel.collapsed .assistant-header h2 {
+                display: none;
+            }
+            
+            .admin-panel.collapsed .close-admin,
+            .worker-panel.collapsed .close-worker,
+            .assistant-panel.collapsed .close-assistant {
+                display: none;
+            }
+            
+            .panel-collapse-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #585149;
+                color: #f0ede5;
+                border: none;
+                border-radius: 50%;
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                flex-shrink: 0;
+            }
+            
+            .panel-collapse-btn:hover {
+                background: #6b6258;
+                transform: scale(1.1);
+            }
+            
+            .admin-panel.collapsed .panel-collapse-btn,
+            .worker-panel.collapsed .panel-collapse-btn,
+            .assistant-panel.collapsed .panel-collapse-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+            
+            .admin-panel .panel-collapse-btn,
+            .worker-panel .panel-collapse-btn,
+            .assistant-panel .panel-collapse-btn {
+                display: none;
+            }
+            
+            .admin-panel.open .panel-collapse-btn,
+            .worker-panel.open .panel-collapse-btn,
+            .assistant-panel.open .panel-collapse-btn {
+                display: flex;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .panel-collapse-btn {
+                display: none !important;
+            }
+        }
+        
         .admin-header, .worker-header, .assistant-header {
             display: flex;
             justify-content: space-between;
@@ -1076,12 +1162,20 @@
             margin-bottom: 20px;
             padding-bottom: 12px;
             border-bottom: 1px solid #c3a684;
+            gap: 8px;
         }
         
         .admin-header h2, .worker-header h2, .assistant-header h2 {
             font-size: 22px;
             font-weight: 500;
             color: #585149;
+            flex: 1;
+        }
+        
+        .header-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
         }
         
         .close-admin, .close-worker, .close-assistant {
@@ -1098,6 +1192,7 @@
             justify-content: center;
             transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             touch-action: manipulation;
+            flex-shrink: 0;
         }
         
         .close-admin:hover, .close-worker:hover, .close-assistant:hover {
@@ -1457,7 +1552,6 @@
             }
         }
         
-        /* Кнопки направления сортировки */
         .sort-direction-btn {
             background: #c3a684;
             border: none;
@@ -2024,7 +2118,6 @@
             }
         }
         
-        /* КРЕСТИК — БЕЗ НОВЫХ АНИМАЦИЙ (только базовые) */
         .login-close {
             position: absolute;
             top: 12px;
@@ -2090,6 +2183,23 @@
             gap: 12px;
             align-items: center;
             transition: all 0.3s ease;
+            cursor: grab;
+            user-select: none;
+        }
+        
+        .showcase-item:active {
+            cursor: grabbing;
+        }
+        
+        .showcase-item.dragging {
+            opacity: 0.4;
+            background: rgba(195, 166, 132, 0.5);
+            transform: scale(0.98);
+        }
+        
+        .showcase-item.drag-over {
+            border-top: 3px solid #585149;
+            background: rgba(255, 255, 255, 0.95);
         }
         
         .showcase-item:hover {
@@ -2100,6 +2210,7 @@
         @media (max-width: 600px) {
             .showcase-item {
                 transition: box-shadow 0.3s ease;
+                cursor: default;
             }
             .showcase-item:hover {
                 transform: none;
@@ -2111,10 +2222,14 @@
             height: 60px;
             object-fit: cover;
             border-radius: 10px;
+            pointer-events: none;
+            user-select: none;
+            -webkit-user-drag: none;
         }
         
         .showcase-item-info {
             flex: 1;
+            pointer-events: none;
         }
         
         .showcase-item-code {
@@ -2157,6 +2272,28 @@
             }
             .showcase-item-actions button:active {
                 transform: none;
+            }
+        }
+        
+        .drag-handle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #7a6e5f;
+            padding: 0 4px;
+            cursor: grab;
+            user-select: none;
+            flex-shrink: 0;
+        }
+        
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+        
+        @media (max-width: 600px) {
+            .drag-handle {
+                cursor: default;
             }
         }
         
@@ -2671,9 +2808,13 @@
 <div id="adminPanel" class="admin-panel">
     <div class="admin-header">
         <h2>Админ-панель</h2>
-        <button class="close-admin" onclick="closeAdminPanel()">✕</button>
+        <div class="header-buttons">
+            <button class="panel-collapse-btn" onclick="togglePanelCollapse('adminPanel')" title="Свернуть/Развернуть">◀</button>
+            <button class="close-admin" onclick="closeAdminPanel()">✕</button>
+        </div>
     </div>
     
+    <div class="panel-content-wrapper">
     <div id="adminTabs" style="display: flex; gap: 10px; margin-bottom: 20px;">
         <button onclick="showAdminTab('codes')" style="flex:1; background:#585149; border-radius: 12px; cursor: pointer;">Коды</button>
         <button onclick="showAdminTab('requests')" style="flex:1; background:#c3a684; color:#585149; border-radius: 12px; cursor: pointer;">Заявки</button>
@@ -2765,7 +2906,7 @@
             <button class="save-btn" onclick="addToShowcase()" style="margin-top: 10px;">Добавить в витрину</button>
         </div>
         
-        <h4>Скины в витрине</h4>
+        <h4>Скины в витрине <span style="font-size: 11px; color: #7a6e5f; font-weight: normal;">(перетащите за ⠿, чтобы изменить порядок)</span></h4>
         <div id="showcaseListContainer" class="codes-container"></div>
     </div>
     
@@ -2782,14 +2923,19 @@
             <div id="notificationStatus" class="notification-status">Текущий статус: нет активного уведомления</div>
         </div>
     </div>
+    </div>
 </div>
 
 <div id="workerPanel" class="worker-panel">
     <div class="worker-header">
         <h2>Панель скинодела</h2>
-        <button class="close-worker" onclick="closeWorkerPanel()">✕</button>
+        <div class="header-buttons">
+            <button class="panel-collapse-btn" onclick="togglePanelCollapse('workerPanel')" title="Свернуть/Развернуть">◀</button>
+            <button class="close-worker" onclick="closeWorkerPanel()">✕</button>
+        </div>
     </div>
     
+    <div class="panel-content-wrapper">
     <h3>1. Перетащите файлы с параметрами сюда</h3>
     <div id="workerUploadArea" class="upload-area">
         Перетащите файлы или нажмите для выбора
@@ -2808,14 +2954,19 @@
     <button class="save-btn" onclick="sendRequest('worker')">Отправить заявку на модерацию</button>
     
     <div id="workerMessage"></div>
+    </div>
 </div>
 
 <div id="assistantPanel" class="assistant-panel">
     <div class="assistant-header">
         <h2>Панель ассистента</h2>
-        <button class="close-assistant" onclick="closeAssistantPanel()">✕</button>
+        <div class="header-buttons">
+            <button class="panel-collapse-btn" onclick="togglePanelCollapse('assistantPanel')" title="Свернуть/Развернуть">◀</button>
+            <button class="close-assistant" onclick="closeAssistantPanel()">✕</button>
+        </div>
     </div>
     
+    <div class="panel-content-wrapper">
     <h3>1. Перетащите файлы с параметрами сюда</h3>
     <div id="assistantUploadArea" class="upload-area">
         Перетащите файлы или нажмите для выбора
@@ -2834,6 +2985,7 @@
     <button class="save-btn" onclick="sendRequest('assistant')">Отправить заявку на модерацию</button>
     
     <div id="assistantMessage"></div>
+    </div>
 </div>
 
 <div id="editCodeModal" class="edit-code-modal">
@@ -2848,7 +3000,6 @@
     </div>
 </div>
 
-<!-- ===== МЕНЮ ВЫБОРА ИСТОЧНИКА ЗАГРУЗКИ (ДЛЯ ТЕЛЕФОНА) ===== -->
 <div id="uploadChoiceOverlay" class="upload-choice-overlay">
     <div class="upload-choice-menu">
         <h4>Откуда загрузить файл?</h4>
@@ -2894,7 +3045,7 @@
         }
     })();
     
-    // ===== ВЗРЫВ ЗВЁЗДОЧЕК ПРИ КЛИКЕ (для ПК и телефона) =====
+    // ===== ВЗРЫВ ЗВЁЗДОЧЕК ПРИ КЛИКЕ =====
     (function createClickBurst() {
         const burstColors = ['#4e473f', '#70685d', '#dccfb6', '#c1a27f', '#ebe6db'];
         const starSymbols = ['✦', '✧', '⋆', '✦', '✧'];
@@ -3032,7 +3183,6 @@
     let currentPhotosList = [];
     let currentPhotoIndex = 0;
     
-    // Массивы объектов { url, name }
     let adminUploadedFiles = [];
     let adminEditMode = false;
     let adminEditCodeName = null;
@@ -3081,6 +3231,25 @@
     let isAssistantUser = false;
     
     let currentUploadRole = 'admin';
+    
+    // ===== DRAG-AND-DROP ДЛЯ ВИТРИНЫ =====
+    let draggedShowcaseId = null;
+    
+    // ===== СВОРАЧИВАНИЕ ПАНЕЛЕЙ =====
+    function togglePanelCollapse(panelId) {
+        const panel = document.getElementById(panelId);
+        if (!panel) return;
+        
+        if (panel.classList.contains('collapsed')) {
+            panel.classList.remove('collapsed');
+            const btn = panel.querySelector('.panel-collapse-btn');
+            if (btn) btn.textContent = '◀';
+        } else {
+            panel.classList.add('collapsed');
+            const btn = panel.querySelector('.panel-collapse-btn');
+            if (btn) btn.textContent = '▶';
+        }
+    }
     
     // ===== ФУНКЦИИ СОРТИРОВКИ ФАЙЛОВ ПО НОМЕРУ =====
     function extractNumberFromFilename(filename) {
@@ -3599,7 +3768,6 @@
         }
     }
     
-    // ===== ФУНКЦИЯ ОТКРЫТИЯ ВЫБОРА ИСТОЧНИКА =====
     function openUploadChoice(role) {
         currentUploadRole = role;
         document.getElementById('uploadChoiceOverlay').classList.add('show');
@@ -3609,7 +3777,6 @@
         document.getElementById('uploadChoiceOverlay').classList.remove('show');
     }
     
-    // ===== ОБРАБОТЧИКИ ВЫБОРА =====
     document.getElementById('choiceGallery').addEventListener('click', () => {
         closeUploadChoice();
         const inputId = currentUploadRole === 'admin' ? 'adminFileInput' :
@@ -3794,7 +3961,8 @@
                 const isVideoFile = isVideo(item.imageUrl);
                 
                 html += `
-                    <div class="showcase-item">
+                    <div class="showcase-item" draggable="true" data-showcase-id="${showcaseId}" ondragstart="handleShowcaseDragStart(event, '${showcaseId}')" ondragover="handleShowcaseDragOver(event)" ondragleave="handleShowcaseDragLeave(event)" ondrop="handleShowcaseDrop(event, '${showcaseId}')" ondragend="handleShowcaseDragEnd(event)">
+                        <div class="drag-handle" title="Перетащите, чтобы изменить порядок">⠿</div>
                         ${isVideoFile ? 
                             `<video src="${item.imageUrl}" muted preload="metadata" style="width:60px; height:60px; object-fit:cover; border-radius:10px; background:#000;"></video>` :
                             `<img src="${item.imageUrl}" onerror="this.style.opacity='0.5'" loading="lazy">`
@@ -3804,9 +3972,7 @@
                             <div style="font-size: 11px; color: #7a6e5f;">Порядок: ${orderNumber}</div>
                         </div>
                         <div class="showcase-item-actions">
-                            <button onclick="moveShowcaseItem('${showcaseId}', 'up')">↑</button>
-                            <button onclick="moveShowcaseItem('${showcaseId}', 'down')">↓</button>
-                            <button onclick="removeFromShowcase('${showcaseId}')">🗑</button>
+                            <button onclick="event.stopPropagation(); removeFromShowcase('${showcaseId}')">🗑</button>
                         </div>
                     </div>
                 `;
@@ -3816,6 +3982,102 @@
         } catch (error) {
             console.error('Ошибка загрузки списка витрины:', error);
             container.innerHTML = '<div style="text-align:center; padding:15px;">Ошибка загрузки</div>';
+        }
+    }
+    
+    // ===== DRAG-AND-DROP ДЛЯ ВИТРИНЫ =====
+    function handleShowcaseDragStart(event, showcaseId) {
+        draggedShowcaseId = showcaseId;
+        event.target.classList.add('dragging');
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', showcaseId);
+    }
+    
+    function handleShowcaseDragOver(event) {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'move';
+        const target = event.currentTarget;
+        if (target && !target.classList.contains('dragging')) {
+            target.classList.add('drag-over');
+        }
+    }
+    
+    function handleShowcaseDragLeave(event) {
+        event.currentTarget.classList.remove('drag-over');
+    }
+    
+    function handleShowcaseDrop(event, targetShowcaseId) {
+        event.preventDefault();
+        event.currentTarget.classList.remove('drag-over');
+        
+        if (!draggedShowcaseId || draggedShowcaseId === targetShowcaseId) return;
+        
+        const showcaseId = draggedShowcaseId;
+        draggedShowcaseId = null;
+        
+        // Определяем, вверх или вниз перетащили
+        const allItems = document.querySelectorAll('.showcase-item');
+        let draggedIndex = -1;
+        let targetIndex = -1;
+        
+        allItems.forEach((el, idx) => {
+            if (el.dataset.showcaseId === showcaseId) draggedIndex = idx;
+            if (el.dataset.showcaseId === targetShowcaseId) targetIndex = idx;
+        });
+        
+        if (draggedIndex === -1 || targetIndex === -1) return;
+        
+        reorderShowcaseItems(showcaseId, targetShowcaseId, draggedIndex, targetIndex);
+    }
+    
+    function handleShowcaseDragEnd(event) {
+        event.target.classList.remove('dragging');
+        document.querySelectorAll('.showcase-item').forEach(el => el.classList.remove('drag-over'));
+    }
+    
+    async function reorderShowcaseItems(draggedId, targetId, draggedIndex, targetIndex) {
+        try {
+            const snapshot = await db.collection('showcase').orderBy('order', 'asc').get();
+            const items = [];
+            snapshot.forEach(doc => {
+                items.push({ id: doc.id, ...doc.data() });
+            });
+            
+            const draggedItem = items.find(i => i.id === draggedId);
+            const targetItem = items.find(i => i.id === targetId);
+            
+            if (!draggedItem || !targetItem) return;
+            
+            // Удаляем перетаскиваемый элемент
+            const draggedIdx = items.indexOf(draggedItem);
+            items.splice(draggedIdx, 1);
+            
+            // Вставляем его перед или после целевого
+            const newTargetIdx = items.indexOf(targetItem);
+            
+            if (draggedIndex < targetIndex) {
+                // Перетащили вниз — вставляем после целевого
+                items.splice(newTargetIdx + 1, 0, draggedItem);
+            } else {
+                // Перетащили вверх — вставляем перед целевым
+                items.splice(newTargetIdx, 0, draggedItem);
+            }
+            
+            // Обновляем order у всех
+            const batch = db.batch();
+            items.forEach((item, idx) => {
+                const ref = db.collection('showcase').doc(item.id);
+                batch.update(ref, { order: idx });
+            });
+            
+            await batch.commit();
+            
+            loadShowcaseList();
+            loadShowcase();
+            showMessage('adminMessage', 'Порядок обновлён!', 'success');
+        } catch (error) {
+            console.error('Ошибка изменения порядка:', error);
+            showMessage('adminMessage', 'Ошибка изменения порядка', 'error');
         }
     }
     
@@ -3832,38 +4094,6 @@
         } catch (error) {
             console.error('Ошибка удаления:', error);
             showMessage('adminMessage', 'Ошибка удаления', 'error');
-        }
-    }
-    
-    async function moveShowcaseItem(showcaseId, direction) {
-        if (!isAdminUser) return;
-        
-        try {
-            const snapshot = await db.collection('showcase').orderBy('order', 'asc').get();
-            const items = [];
-            snapshot.forEach(doc => {
-                items.push({ id: doc.id, ...doc.data() });
-            });
-            
-            const index = items.findIndex(item => item.id === showcaseId);
-            if (index === -1) return;
-            
-            if (direction === 'up' && index > 0) {
-                [items[index].order, items[index - 1].order] = [items[index - 1].order, items[index].order];
-                await db.collection('showcase').doc(items[index].id).update({ order: items[index].order });
-                await db.collection('showcase').doc(items[index - 1].id).update({ order: items[index - 1].order });
-            } else if (direction === 'down' && index < items.length - 1) {
-                [items[index].order, items[index + 1].order] = [items[index + 1].order, items[index].order];
-                await db.collection('showcase').doc(items[index].id).update({ order: items[index].order });
-                await db.collection('showcase').doc(items[index + 1].id).update({ order: items[index + 1].order });
-            }
-            
-            loadShowcaseList();
-            loadShowcase();
-            await loadCodesForSelect();
-        } catch (error) {
-            console.error('Ошибка перемещения:', error);
-            showMessage('adminMessage', 'Ошибка перемещения', 'error');
         }
     }
     
@@ -4769,7 +4999,6 @@
             if (doc.exists) {
                 adminEditMode = true;
                 adminEditCodeName = code;
-                // Загружаем файлы как объекты { url, name }
                 adminUploadedFiles = doc.data().photos.map(url => ({ url, name: url.split('/').pop() }));
                 document.getElementById('adminCodeName').value = code;
                 renderAdminPhotoList();
