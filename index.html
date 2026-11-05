@@ -3240,6 +3240,17 @@
     
     let currentUploadRole = 'admin';
     
+    // ===== ФУНКЦИЯ ЗАМЕНЫ ССЫЛОК GITHUB НА JSDELIVR =====
+    function fixImageUrl(url) {
+        if (!url) return url;
+        if (url.indexOf('raw.githubusercontent.com') === -1) return url;
+        
+        return url
+            .replace('raw.githubusercontent.com/', 'cdn.jsdelivr.net/gh/')
+            .replace('/pony_storage_2/', '/pony_storage_2@main/')
+            .replace('/pony_storage/', '/pony_storage@main/');
+    }
+    
     // ===== СВОРАЧИВАНИЕ ПАНЕЛЕЙ =====
     function togglePanelCollapse(panelId) {
         const panel = document.getElementById(panelId);
@@ -3346,6 +3357,7 @@
     
     // ===== ФУНКЦИЯ ДЛЯ ОТКРЫТИЯ ФОТО В МОДАЛКЕ =====
     function openPhotoModal(url) {
+        url = fixImageUrl(url);
         const modal = document.getElementById('modal');
         const modalImg = document.getElementById('modalImage');
         const videoPlayer = document.getElementById('videoPlayer');
@@ -3641,7 +3653,7 @@
             let html = '';
             snapshot.forEach(doc => {
                 const item = doc.data();
-                const fileUrl = item.imageUrl || '';
+                const fileUrl = fixImageUrl(item.imageUrl || '');
                 const code = item.code;
                 const isVideoFile = isVideo(fileUrl);
                 
@@ -3671,6 +3683,7 @@
     }
     
     function openShowcaseImageModal(url) {
+        url = fixImageUrl(url);
         const modal = document.getElementById('modal');
         const modalImg = document.getElementById('modalImage');
         const videoPlayer = document.getElementById('videoPlayer');
@@ -3691,6 +3704,7 @@
     }
     
     function openShowcaseVideoModal(url) {
+        url = fixImageUrl(url);
         const modal = document.getElementById('modal');
         const modalImg = document.getElementById('modalImage');
         const videoPlayer = document.getElementById('videoPlayer');
@@ -3826,7 +3840,7 @@
             
             const previewDiv = document.getElementById('showcasePreview');
             const previewImg = document.getElementById('showcasePreviewImage');
-            previewImg.src = result.url;
+            previewImg.src = fixImageUrl(result.url);
             previewDiv.style.display = 'block';
             
             setTimeout(() => {
@@ -3963,14 +3977,15 @@
             snapshot.forEach(doc => {
                 const item = doc.data();
                 const showcaseId = doc.id;
-                const isVideoFile = isVideo(item.imageUrl);
+                const fixedUrl = fixImageUrl(item.imageUrl);
+                const isVideoFile = isVideo(fixedUrl);
                 
                 html += `
                     <div class="showcase-item" draggable="true" data-showcase-id="${showcaseId}" ondragstart="handleShowcaseDragStart(event, '${showcaseId}')" ondragover="handleShowcaseDragOver(event)" ondragleave="handleShowcaseDragLeave(event)" ondrop="handleShowcaseDrop(event, '${showcaseId}')" ondragend="handleShowcaseDragEnd(event)">
                         <div class="drag-handle" title="Перетащите, чтобы изменить порядок">⠿</div>
                         ${isVideoFile ? 
-                            `<video src="${item.imageUrl}" muted preload="metadata" style="width:60px; height:60px; object-fit:cover; border-radius:10px; background:#000;"></video>` :
-                            `<img src="${item.imageUrl}" onerror="this.style.opacity='0.5'" loading="lazy">`
+                            `<video src="${fixedUrl}" muted preload="metadata" style="width:60px; height:60px; object-fit:cover; border-radius:10px; background:#000;"></video>` :
+                            `<img src="${fixedUrl}" onerror="this.style.opacity='0.5'" loading="lazy">`
                         }
                         <div class="showcase-item-info">
                             <div class="showcase-item-code">Код: ${escapeHtml(item.code)}</div>
@@ -4903,11 +4918,12 @@
                 const userEmail = request.userEmail || 'email не указан';
                 
                 const photosHtml = photos.map((url, idx) => {
-                    const isVideoFile = isVideo(url);
+                    const fixedUrl = fixImageUrl(url);
+                    const isVideoFile = isVideo(fixedUrl);
                     if (isVideoFile) {
-                        return `<video src="${url}" class="request-photo" muted preload="metadata" onclick="openRequestVideoModal('${url}')" style="object-fit:cover; background:#000;" title="Видео ${idx + 1}"></video>`;
+                        return `<video src="${fixedUrl}" class="request-photo" muted preload="metadata" onclick="openRequestVideoModal('${fixedUrl}')" style="object-fit:cover; background:#000;" title="Видео ${idx + 1}"></video>`;
                     }
-                    return `<img src="${url}" class="request-photo" onclick="openRequestPhotoModal('${url}')" loading="lazy" onerror="this.style.opacity='0.3'" title="Фото ${idx + 1}">`;
+                    return `<img src="${fixedUrl}" class="request-photo" onclick="openRequestPhotoModal('${fixedUrl}')" loading="lazy" onerror="this.style.opacity='0.3'" title="Фото ${idx + 1}">`;
                 }).join('');
                 
                 html += `
@@ -4935,6 +4951,7 @@
     }
     
     function openRequestPhotoModal(url) {
+        url = fixImageUrl(url);
         const modal = document.getElementById('modal');
         const modalImg = document.getElementById('modalImage');
         const videoPlayer = document.getElementById('videoPlayer');
@@ -4953,6 +4970,7 @@
     }
     
     function openRequestVideoModal(url) {
+        url = fixImageUrl(url);
         const modal = document.getElementById('modal');
         const modalImg = document.getElementById('modalImage');
         const videoPlayer = document.getElementById('videoPlayer');
@@ -5076,7 +5094,7 @@
         let html = '';
         for (let i = 0; i < adminUploadedFiles.length; i++) {
             const file = adminUploadedFiles[i];
-            const url = file.url;
+            const url = fixImageUrl(file.url);
             const isVideoFile = isVideo(url);
             const displayName = getFileDisplayName(file);
             const displayNumber = i + 1;
@@ -5291,7 +5309,7 @@
         let html = '';
         for (let i = 0; i < workerUploadedFiles.length; i++) {
             const file = workerUploadedFiles[i];
-            const url = file.url;
+            const url = fixImageUrl(file.url);
             const isVideoFile = isVideo(url);
             const displayName = getFileDisplayName(file);
             const displayNumber = i + 1;
@@ -5389,7 +5407,7 @@
         let html = '';
         for (let i = 0; i < assistantUploadedFiles.length; i++) {
             const file = assistantUploadedFiles[i];
-            const url = file.url;
+            const url = fixImageUrl(file.url);
             const isVideoFile = isVideo(url);
             const displayName = getFileDisplayName(file);
             const displayNumber = i + 1;
@@ -5573,10 +5591,10 @@
             const doc = await db.collection('codes').doc(code).get();
             if (doc.exists) {
                 const photos = doc.data().photos || [];
-                currentPhotosList = [...photos];
+                currentPhotosList = photos.map(url => fixImageUrl(url));
                 let html = '';
                 for (let i = 0; i < photos.length; i++) {
-                    const url = photos[i];
+                    const url = fixImageUrl(photos[i]);
                     const isVideoFile = isVideo(url);
                     const numberLabel = isVideoFile ? `🎬 ${i + 1}` : `${i + 1}`;
                     
@@ -5611,6 +5629,7 @@
     }
     
     function openVideoModal(src, index) {
+        src = fixImageUrl(src);
         const modal = document.getElementById('modal');
         const modalImg = document.getElementById('modalImage');
         const videoPlayer = document.getElementById('videoPlayer');
@@ -5759,6 +5778,7 @@
     }
     
     function openModal(src, index) {
+        src = fixImageUrl(src);
         const modal = document.getElementById('modal');
         const modalImg = document.getElementById('modalImage');
         const videoPlayer = document.getElementById('videoPlayer');
