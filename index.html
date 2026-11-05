@@ -3240,15 +3240,24 @@
     
     let currentUploadRole = 'admin';
     
-    // ===== ФУНКЦИЯ ЗАМЕНЫ ССЫЛОК GITHUB НА JSDELIVR =====
+    // ===== ФУНКЦИЯ ЗАМЕНЫ ССЫЛОК НА WORKER =====
     function fixImageUrl(url) {
         if (!url) return url;
-        if (url.indexOf('raw.githubusercontent.com') === -1) return url;
         
-        return url
-            .replace('raw.githubusercontent.com/', 'cdn.jsdelivr.net/gh/')
-            .replace('/pony_storage_2/', '/pony_storage_2@main/')
-            .replace('/pony_storage/', '/pony_storage@main/');
+        // Если уже ведёт на Worker — оставляем как есть
+        if (url.indexOf('gallery-trigger.makvirter.workers.dev') !== -1) {
+            return url;
+        }
+        
+        // Если это jsDelivr или raw.githubusercontent — перенаправляем на Worker
+        if (url.indexOf('cdn.jsdelivr.net') !== -1 || url.indexOf('raw.githubusercontent.com') !== -1) {
+            const match = url.match(/\/(pony_storage_2|pony_storage)\/(?:main|@main)\/(.+)/);
+            if (match && match[2]) {
+                return 'https://gallery-trigger.makvirter.workers.dev/images/' + match[2];
+            }
+        }
+        
+        return url;
     }
     
     // ===== СВОРАЧИВАНИЕ ПАНЕЛЕЙ =====
