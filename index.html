@@ -3251,7 +3251,8 @@
         
         // Если это jsDelivr или raw.githubusercontent — перенаправляем на Worker
         if (url.indexOf('cdn.jsdelivr.net') !== -1 || url.indexOf('raw.githubusercontent.com') !== -1) {
-            const match = url.match(/\/(pony_storage_2|pony_storage)\/(?:main|@main)\/(.+)/);
+            // Извлекаем путь после имени репозитория и ветки
+            var match = url.match(/\/(pony_storage_2|pony_storage)\/(?:main|@main)\/(.+)/);
             if (match && match[2]) {
                 return 'https://gallery-trigger.makvirter.workers.dev/images/' + match[2];
             }
@@ -4733,6 +4734,7 @@
         }
     }
     
+    // ===== ИСПРАВЛЕННАЯ ФУНКЦИЯ ЗАГРУЗКИ =====
     async function uploadToGitHub(file) {
         const formData = new FormData();
         formData.append('file', file);
@@ -4743,8 +4745,21 @@
                 body: formData
             });
             const data = await response.json();
+            
             if (data.url) {
-                return { url: data.url, name: file.name };
+                // ВАЖНО: нормализуем URL, чтобы он всегда вёл на Worker с правильным путём
+                // Worker возвращает ссылку вида https://gallery-trigger.../images/ИМЯ_ФАЙЛА
+                // Но если вдруг он вернул jsDelivr — конвертируем в Worker-ссылку
+                let finalUrl = data.url;
+                
+                if (finalUrl.indexOf('cdn.jsdelivr.net') !== -1 || finalUrl.indexOf('raw.githubusercontent.com') !== -1) {
+                    var match = finalUrl.match(/\/(pony_storage_2|pony_storage)\/(?:main|@main)\/(.+)/);
+                    if (match && match[2]) {
+                        finalUrl = WORKER_URL + '/images/' + match[2];
+                    }
+                }
+                
+                return { url: finalUrl, name: file.name };
             } else {
                 return null;
             }
